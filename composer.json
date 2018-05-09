@@ -1,0 +1,30 @@
+{
+  "name": "jokumer/fal_manja",
+  "type": "typo3-cms-extension",
+  "description": "Provides a Manja driver for TYPO3 File Abstraction Layer.",
+  "license": "GPL-3.0+",
+  "keywords": ["typo3", "TYPO3 CMS", "manja", "fal", "fal_manja"],
+  "homepage": "https://www.manjadigital.de",
+  "authors": [
+    {
+      "name": "J. Kummer",
+      "email": "typo3@enobe.de"
+    }
+  ],
+  "support": {
+    "email": "typo3@enobe.de",
+    "source": "https://bitbucket.org/jokumer/typo3-fal_manja/"
+  },
+  "require": {
+    "php": ">=5.5.0 <8.0",
+    "typo3/cms": ">=7.6.0,<9.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Jokumer\\FalManja\\": "Classes"
+    },
+    "classmap": [
+      "Resources/Private/Vendor/manja-api-4.0"
+    ]
+  }
+}
