@@ -1,5 +1,4 @@
 <?php
-
 namespace Jokumer\FalManja\Service;
 
 use TYPO3\CMS\Core\Messaging\FlashMessage;
@@ -107,8 +106,7 @@ class ManjaConnector implements SingletonInterface
     protected $connectionUseSessions = true;
 
     /**
-     * Initialize this driver and expose the capabilities for the repository to use
-     * Set configurations from driver
+     * Initialize connector, set configurations from driver
      *
      * @param array $configuration
      */

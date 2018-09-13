@@ -1,5 +1,4 @@
 <?php
-
 namespace Jokumer\FalManja\Driver;
 
 use Jokumer\FalManja\Service\ManjaConnector;
@@ -23,12 +22,18 @@ use TYPO3\CMS\Extbase\Object\ObjectManager;
  * @package TYPO3
  * @subpackage tx_falmanja
  * @author J. Kummer <typo3@enobe.de>
+ * @author Falk Roeder <mail@falk-roeder.de>
  * @copyright Copyright belongs to the respective authors
  * @license http://www.gnu.org/licenses/gpl.html GNU General Public License, version 3 or later
  */
 class ManjaDriver extends AbstractHierarchicalFilesystemDriver
 {
 
+    /**
+     * TYPO3 file system driver type
+     *
+     * @const string
+     */
     const DRIVER_TYPE = 'fal_manja';
 
     /**
@@ -88,13 +93,14 @@ class ManjaDriver extends AbstractHierarchicalFilesystemDriver
 
     /**
      * Initialize this driver and expose the capabilities for the repository to use
-     *
+     * Exclude CAPABILITY_WRITABLE which should be set to '0' cause modification of files and folders are not supported
+     * 
      * @param array $configuration
      */
     public function __construct(array $configuration = [])
     {
         parent::__construct($configuration);
-        $this->capabilities = ResourceStorage::CAPABILITY_BROWSABLE | ResourceStorage::CAPABILITY_PUBLIC | ResourceStorage::CAPABILITY_WRITABLE;
+        $this->capabilities = ResourceStorage::CAPABILITY_BROWSABLE | ResourceStorage::CAPABILITY_PUBLIC; // Exclude ResourceStorage::CAPABILITY_WRITABLE
     }
 
     /**
@@ -144,6 +150,7 @@ class ManjaDriver extends AbstractHierarchicalFilesystemDriver
      */
     public function mergeConfigurationCapabilities($capabilities)
     {
+        // See constructor method where the capabilities for the repository are exposed
         $this->capabilities &= $capabilities;
         return $this->capabilities;
     }
@@ -165,7 +172,6 @@ class ManjaDriver extends AbstractHierarchicalFilesystemDriver
      */
     public function getDefaultFolder()
     {
-        // @todo: Make configurable see EXT:fal_s3
         return $this->getRootLevelFolder();
     }
 
@@ -200,7 +206,7 @@ class ManjaDriver extends AbstractHierarchicalFilesystemDriver
         // @todo: Solve processed folder - should be local an not at external manja storage
         if ($folderIdentifier === '_processed_') {
             throw new \RuntimeException(
-                'The processed folder must be local! Configure storage like \'1:/_processed_manja\' which stores processed files in fileadmin.',
+                'The processed folder must be local! Configure storage like \'0:/typo3temp/assets/_processed_\' which stores processed files in typo3temp.',
                 1519867205
             );
         }
@@ -221,7 +227,6 @@ class ManjaDriver extends AbstractHierarchicalFilesystemDriver
      */
     public function getPermissions($identifier)
     {
-        // @todo: Check if we have correct rights for current files and folders
         return [
             'r' => true,
             'w' => true
@@ -498,7 +503,7 @@ class ManjaDriver extends AbstractHierarchicalFilesystemDriver
      */
     public function createFolder($newFolderName, $parentFolderIdentifier = '', $recursive = false)
     {
-        #\TYPO3\CMS\Extbase\Utility\DebuggerUtility::var_dump(__FUNCTION__, __CLASS__);
+        // Feature not available
     }
 
     /**
@@ -510,7 +515,7 @@ class ManjaDriver extends AbstractHierarchicalFilesystemDriver
      */
     public function getPublicUrl($identifier)
     {
-        #\TYPO3\CMS\Extbase\Utility\DebuggerUtility::var_dump(__FUNCTION__, __CLASS__);
+        // Feature not available
     }
 
     /**
@@ -522,7 +527,7 @@ class ManjaDriver extends AbstractHierarchicalFilesystemDriver
      */
     public function renameFolder($folderIdentifier, $newName)
     {
-        #\TYPO3\CMS\Extbase\Utility\DebuggerUtility::var_dump(__FUNCTION__, __CLASS__);
+        // Feature not available
     }
 
     /**
@@ -535,7 +540,7 @@ class ManjaDriver extends AbstractHierarchicalFilesystemDriver
      */
     public function deleteFolder($folderIdentifier, $deleteRecursively = false)
     {
-        #\TYPO3\CMS\Extbase\Utility\DebuggerUtility::var_dump(__FUNCTION__, __CLASS__);
+        // Feature not available
     }
 
     /**
@@ -546,7 +551,7 @@ class ManjaDriver extends AbstractHierarchicalFilesystemDriver
      */
     public function isFolderEmpty($folderIdentifier)
     {
-        #\TYPO3\CMS\Extbase\Utility\DebuggerUtility::var_dump(__FUNCTION__, __CLASS__);
+        // Feature not available
     }
 
     /**
@@ -564,7 +569,7 @@ class ManjaDriver extends AbstractHierarchicalFilesystemDriver
      */
     public function addFile($localFilePath, $targetFolderIdentifier, $newFileName = '', $removeOriginal = true)
     {
-        #\TYPO3\CMS\Extbase\Utility\DebuggerUtility::var_dump(__FUNCTION__, __CLASS__);
+        // Feature not available
     }
 
     /**
@@ -577,7 +582,7 @@ class ManjaDriver extends AbstractHierarchicalFilesystemDriver
      */
     public function createFile($fileName, $parentFolderIdentifier)
     {
-        #\TYPO3\CMS\Extbase\Utility\DebuggerUtility::var_dump(__FUNCTION__, __CLASS__);
+        // Feature not available
     }
 
     /**
@@ -592,7 +597,7 @@ class ManjaDriver extends AbstractHierarchicalFilesystemDriver
      */
     public function copyFileWithinStorage($fileIdentifier, $targetFolderIdentifier, $fileName)
     {
-        #\TYPO3\CMS\Extbase\Utility\DebuggerUtility::var_dump(__FUNCTION__, __CLASS__);
+        // Feature not available
     }
 
     /**
@@ -605,7 +610,7 @@ class ManjaDriver extends AbstractHierarchicalFilesystemDriver
      */
     public function renameFile($fileIdentifier, $newName)
     {
-        #\TYPO3\CMS\Extbase\Utility\DebuggerUtility::var_dump(__FUNCTION__, __CLASS__);
+        // Feature not available
     }
 
     /**
@@ -617,7 +622,7 @@ class ManjaDriver extends AbstractHierarchicalFilesystemDriver
      */
     public function replaceFile($fileIdentifier, $localFilePath)
     {
-        #\TYPO3\CMS\Extbase\Utility\DebuggerUtility::var_dump(__FUNCTION__, __CLASS__);
+        // Feature not available
     }
 
     /**
@@ -630,7 +635,7 @@ class ManjaDriver extends AbstractHierarchicalFilesystemDriver
      */
     public function deleteFile($fileIdentifier)
     {
-        #\TYPO3\CMS\Extbase\Utility\DebuggerUtility::var_dump(__FUNCTION__, __CLASS__);
+        // Feature not available
     }
 
     /**
@@ -645,7 +650,7 @@ class ManjaDriver extends AbstractHierarchicalFilesystemDriver
      */
     public function moveFileWithinStorage($fileIdentifier, $targetFolderIdentifier, $newFileName)
     {
-        #\TYPO3\CMS\Extbase\Utility\DebuggerUtility::var_dump(__FUNCTION__, __CLASS__);
+        // Feature not available
     }
 
     /**
@@ -659,7 +664,7 @@ class ManjaDriver extends AbstractHierarchicalFilesystemDriver
      */
     public function moveFolderWithinStorage($sourceFolderIdentifier, $targetFolderIdentifier, $newFolderName)
     {
-        #\TYPO3\CMS\Extbase\Utility\DebuggerUtility::var_dump(__FUNCTION__, __CLASS__);
+        // Feature not available
     }
 
     /**
@@ -672,7 +677,7 @@ class ManjaDriver extends AbstractHierarchicalFilesystemDriver
      */
     public function copyFolderWithinStorage($sourceFolderIdentifier, $targetFolderIdentifier, $newFolderName)
     {
-        #\TYPO3\CMS\Extbase\Utility\DebuggerUtility::var_dump(__FUNCTION__, __CLASS__);
+        // Feature not available
     }
 
     /**
@@ -686,7 +691,7 @@ class ManjaDriver extends AbstractHierarchicalFilesystemDriver
      */
     public function getFileContents($fileIdentifier)
     {
-        #\TYPO3\CMS\Extbase\Utility\DebuggerUtility::var_dump(__FUNCTION__, __CLASS__);
+        // Feature not available
     }
 
     /**
@@ -698,7 +703,7 @@ class ManjaDriver extends AbstractHierarchicalFilesystemDriver
      */
     public function setFileContents($fileIdentifier, $contents)
     {
-        #\TYPO3\CMS\Extbase\Utility\DebuggerUtility::var_dump(__FUNCTION__, __CLASS__);
+        // Feature not available
     }
 
     /**
@@ -710,7 +715,7 @@ class ManjaDriver extends AbstractHierarchicalFilesystemDriver
      */
     public function fileExistsInFolder($fileName, $folderIdentifier)
     {
-        #\TYPO3\CMS\Extbase\Utility\DebuggerUtility::var_dump(__FUNCTION__, __CLASS__);
+        // Feature not available
     }
 
     /**
@@ -722,7 +727,7 @@ class ManjaDriver extends AbstractHierarchicalFilesystemDriver
      */
     public function folderExistsInFolder($folderName, $folderIdentifier)
     {
-        #\TYPO3\CMS\Extbase\Utility\DebuggerUtility::var_dump(__FUNCTION__, __CLASS__);
+        // Feature not available
     }
 
     /**

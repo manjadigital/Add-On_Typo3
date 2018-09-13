@@ -1,32 +1,24 @@
 <?php
 namespace Jokumer\FalManja\Signal;
 
-/***
- *
- * This file is part of an "anders und sehr" Extension for TYPO3 CMS.
- *
- * For the full copyright and license information, please read the
- * LICENSE.txt file that was distributed with this source code.
- *
- * (c) 2017 Markus Hölzle <m.hoelzle@andersundsehr.com>, anders und sehr GmbH
- * Stefan Lamm <s.lamm@andersundsehr.com>, anders und sehr GmbH
- *
- ***/
-
 use Jokumer\FalManja\Driver\ManjaDriver;
 use TYPO3\CMS\Core\Resource\File;
-use TYPO3\CMS\Core\Resource\FileRepository;
 use TYPO3\CMS\Core\Resource\Index\MetaDataRepository;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Type\File\ImageInfo;
 
 /**
+ * Class FileIndexRepository
  * Signals for metadata update
  *
- * @author Markus Hölzle <m.hoelzle@andersundsehr.com>
- * @author Stefan Lamm <s.lamm@andersundsehr.com>
- * @package AUS\AusDriverAmazonS3\Signal
+ * @package TYPO3
+ * @subpackage tx_falmanja
+ * @author (c) 2017 Markus Hölzle <m.hoelzle@andersundsehr.com>, anders und sehr GmbH
+ * @author Stefan Lamm <s.lamm@andersundsehr.com>, anders und sehr GmbH
+ * @author Falk Roeder <mail@falk-roeder.de>
+ * @copyright Copyright belongs to the respective authors
+ * @license http://www.gnu.org/licenses/gpl.html GNU General Public License, version 3 or later
  */
 class FileIndexRepository
 {
@@ -76,6 +68,8 @@ class FileIndexRepository
      */
     protected function getMetaDataRepository()
     {
-        return GeneralUtility::makeInstance(MetaDataRepository::class);
+        /** @var MetaDataRepository $metaDataRepository */
+        $metaDataRepository = GeneralUtility::makeInstance(MetaDataRepository::class);
+        return $metaDataRepository;
     }
 }

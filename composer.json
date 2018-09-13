@@ -1,23 +1,28 @@
 {
-  "name": "jokumer/fal_manja",
+  "name": "jokumer/fal-manja",
   "type": "typo3-cms-extension",
   "description": "Provides a Manja driver for TYPO3 File Abstraction Layer.",
   "license": "GPL-3.0+",
-  "keywords": ["typo3", "TYPO3 CMS", "manja", "fal", "fal_manja"],
+  "keywords": ["typo3", "TYPO3 CMS", "fal", "manja", "digital asset management"],
   "homepage": "https://www.manjadigital.de",
   "authors": [
     {
+      "name": "Falk Roeder",
+      "email": "mail@falk-roeder.de",
+      "role": "Developer"
+    },
+    {
       "name": "J. Kummer",
-      "email": "typo3@enobe.de"
+      "email": "service@enobe.de",
+      "role": "Developer"
     }
   ],
   "support": {
-    "email": "typo3@enobe.de",
-    "source": "https://bitbucket.org/jokumer/typo3-fal_manja/"
+    "email": "service@enobe.de",
+    "source": "https://manjagit.virtomain.de/manja/Add-On_Typo3"
   },
   "require": {
-    "php": ">=5.5.0 <8.0",
-    "typo3/cms": ">=7.6.0,<9.0"
+    "typo3/cms-core": ">=7.6 <9.3"
   },
   "autoload": {
     "psr-4": {
@@ -26,5 +31,19 @@
     "classmap": [
       "Resources/Private/Vendor/manja-api-4.0"
     ]
+  },
+  "replace": {
+    "fal_manja": "self.version",
+    "typo3-ter/fal-manja": "self.version"
+  },
+  "config": {
+    "vendor-dir": ".Build/vendor",
+    "bin-dir": ".Build/bin"
+  },
+  "extra": {
+    "typo3/cms": {
+      "cms-package-dir": "{$vendor-dir}/typo3/cms",
+      "web-dir": ".Build/Web"
+    }
   }
 }
