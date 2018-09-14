@@ -741,7 +741,7 @@ class ManjaDriver extends AbstractHierarchicalFilesystemDriver
         if ($folderIdentifier === '/') {
             $canonicalizedIdentifier = $folderIdentifier;
         } else {
-            $canonicalizedIdentifier = rtrim($this->canonicalizeAndCheckFileIdentifier($folderIdentifier), '/') . '/';
+            $canonicalizedIdentifier = rtrim($folderIdentifier, '/') . '/';
         }
         return $canonicalizedIdentifier;
     }
