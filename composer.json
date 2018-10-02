@@ -22,7 +22,7 @@
     "source": "https://manjagit.virtomain.de/manja/Add-On_Typo3"
   },
   "require": {
-    "typo3/cms-core": ">=7.6 <9.3"
+    "typo3/cms-core": ">=7.6 ^9.5"
   },
   "autoload": {
     "psr-4": {

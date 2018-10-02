@@ -6,7 +6,7 @@ Includes Manja API 4.0
 
 ## Requirements
 
-TYPO3 CMS 7 LTS, 8 LTS & 9.2
+TYPO3 CMS 7LTS, 8LTS & 9LTS
 
 ## License
 
