@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<xliff version="1.0">
+	<file source-language="en" target-language="de" datatype="plaintext" original="messages" date="2018-05-08T24:00:00Z" product-name="fal_manja">
+		<header/>
+		<body>
+			<trans-unit id="error">
+				<source>Error</source>
+				<target>Fehler</target>
+			</trans-unit>
+			<trans-unit id="error.sys_file_storage.host.empty">
+				<source>Enter credientials</source>
+				<target>Zugangsdaten eingeben</target>
+			</trans-unit>
+			<trans-unit id="error.sys_file_storage.login.empty">
+				<source>Enter login credientials</source>
+				<target>Zugangsdaten für Login eingeben</target>
+			</trans-unit>
+			<trans-unit id="error.sys_file_storage.login.fail.1525816286">
+				<source>Error login #1525816286</source>
+				<target>Login Fehler #1525816286</target>
+			</trans-unit>
+			<trans-unit id="error.sys_file_storage.login.fail.1525816287">
+				<source>Error login #1525816287</source>
+				<target>Login Fehler #1525816287</target>
+			</trans-unit>
+			<trans-unit id="error.sys_file_storage.login.fail.1525816288">
+				<source>Error login #1525816288</source>
+				<target>Login Fehler #1525816288</target>
+			</trans-unit>
+		</body>
+	</file>
+</xliff>
