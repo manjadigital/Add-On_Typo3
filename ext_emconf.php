@@ -1,5 +1,5 @@
 <?php
-$EM_CONF[$_EXTKEY] = array (
+$EM_CONF[$_EXTKEY] = [
     'title' => 'FAL Manja',
     'description' => 'Provides a Manja driver for TYPO3 File Abstraction Layer.',
     'category' => 'plugin',
@@ -8,18 +8,18 @@ $EM_CONF[$_EXTKEY] = array (
     'shy' => '',
     'priority' => '',
     'module' => '',
-    'state' => 'beta',
+    'state' => 'alpha',
     'internal' => '',
     'uploadfolder' => '0',
     'createDirs' => '',
     'clearCacheOnLoad' => 0,
     'lockType' => '',
-    'version' => '1.0.0-rc5',
-    'constraints' => array (
-        'depends' => array (
-            'typo3' => '7.6.0-9.5.99',
-        ),
-    ),
+    'version' => '2.0.0',
+    'constraints' => [
+        'depends' => [
+            'typo3' => '8.7.0-9.5.99',
+        ],
+    ],
     'autoload' => [
         'psr-4' => [
             'Jokumer\\FalManja\\' => 'Classes',
@@ -28,4 +28,4 @@ $EM_CONF[$_EXTKEY] = array (
             'Resources/Private/Vendor/manja-api-4.0',
         ],
     ],
-);
+];

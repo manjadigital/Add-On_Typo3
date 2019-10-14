@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<xliff version="1.0">
+	<file source-language="en" target-language="de" datatype="plaintext" original="messages" date="2018-05-08T24:00:00Z" product-name="fal_manja">
+		<header/>
+		<body>
+			<trans-unit id="fal_manja_driver.connection.host">
+				<source>Host</source>
+				<target>Host</target>
+			</trans-unit>
+			<trans-unit id="fal_manja_driver.connection.port">
+				<source>Port</source>
+				<target>Port</target>
+			</trans-unit>
+			<trans-unit id="fal_manja_driver.connection.username">
+				<source>Username</source>
+				<target>Benutzername</target>
+			</trans-unit>
+			<trans-unit id="fal_manja_driver.connection.password">
+				<source>Password</source>
+				<target>Passwort</target>
+			</trans-unit>
+			<trans-unit id="fal_manja_driver.connection.client_id">
+				<source>Client id</source>
+				<target>Benutzer ID</target>
+			</trans-unit>
+			<trans-unit id="fal_manja_driver.connection.tree_id">
+				<source>Tree id</source>
+				<target>Baum ID</target>
+			</trans-unit>
+			<trans-unit id="fal_manja_driver.connection.timeout">
+				<source>Timeout</source>
+				<target>Unterbrechungszeit</target>
+			</trans-unit>
+			<trans-unit id="fal_manja_driver.connection.stream_timeout">
+				<source>Stream timeout</source>
+				<target>Stream Unterbrechungszeit</target>
+			</trans-unit>
+			<trans-unit id="fal_manja_driver.connection.use_ssl">
+				<source>Use SSL</source>
+				<target>SSL verwenden</target>
+			</trans-unit>
+			<trans-unit id="fal_manja_driver.connection.use_session">
+				<source>Use session</source>
+				<target>Session verwenden</target>
+			</trans-unit>
+		</body>
+
+
+
+		<trans-unit id="flexforms_tab.general">
+			<source>General</source>
+			<target>Allgemein</target>
+		</trans-unit>
+		<trans-unit id="flexforms_tab.meta_mapping">
+			<source>Meta data</source>
+			<target>Meta Daten</target>
+		</trans-unit>
+
+
+		<trans-unit id="sys_file_metadata.description">
+			<source>Description</source>
+			<target>Beschreibung</target>
+		</trans-unit>
+		<trans-unit id="sys_file_metadata.title">
+			<source>Title</source>
+			<target>Titel</target>
+		</trans-unit>
+		<trans-unit id="sys_file_metadata.alternative">
+			<source>Alternative</source>
+			<target>Alternativer Titel</target>
+		</trans-unit>
+		<trans-unit id="sys_file_metadata.subject">
+			<source>Subject</source>
+			<target>Themen</target>
+		</trans-unit>
+		<trans-unit id="sys_file_metadata.coverage">
+			<source>Coverage</source>
+			<target>Serie</target>
+		</trans-unit>
+		<trans-unit id="sys_file_metadata.creator">
+			<source>Creator</source>
+			<target>Author</target>
+		</trans-unit>
+		<trans-unit id="sys_file_metadata.publisher">
+			<source>Publisher</source>
+			<target>Herausgeber</target>
+		</trans-unit>
+		<trans-unit id="sys_file_metadata.contributor">
+			<source>Contributor</source>
+			<target>Contributor</target>
+		</trans-unit>
+		<trans-unit id="sys_file_metadata.copyright">
+			<source>Copyright</source>
+			<target>Verwendungsrechte</target>
+		</trans-unit>
+		<trans-unit id="sys_file_metadata.created">
+			<source>Created</source>
+			<target>Aufnahmedatum</target>
+		</trans-unit>
+		<trans-unit id="sys_file_metadata.changed">
+			<source>Changed</source>
+			<target>Geändert</target>
+		</trans-unit>
+		<trans-unit id="sys_file_metadata.keywords">
+			<source>Keywords</source>
+			<target>Stichwörter</target>
+		</trans-unit>
+
+
+	</file>
+</xliff>

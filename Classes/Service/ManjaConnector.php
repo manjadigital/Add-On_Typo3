@@ -1,5 +1,32 @@
 <?php
+declare(strict_types = 1);
+
 namespace Jokumer\FalManja\Service;
+
+/***
+ *
+ * This file is part of the "FalManja" Extension for TYPO3 CMS.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * For the full copyright and license information, please read the
+ * LICENSE.txt file that was distributed with this source code.
+ * If it's not there, see <https://www.gnu.org/licenses/>.
+ *
+ * (c) 2018-present Joerg Kummer, Falk Röder
+ *
+ * @author J. Kummer <typo3@enobe.de>
+ * @author Falk Röder <mail@falk-roeder.de>
+ *
+ ***/
 
 use TYPO3\CMS\Core\Messaging\FlashMessage;
 use TYPO3\CMS\Core\Messaging\FlashMessageQueue;
@@ -11,11 +38,7 @@ use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
 /**
  * Class ManjaConnector
  *
- * @package TYPO3
- * @subpackage tx_falmanja
- * @author J. Kummer <typo3@enobe.de>
- * @copyright Copyright belongs to the respective authors
- * @license http://www.gnu.org/licenses/gpl.html GNU General Public License, version 3 or later
+ * @since 1.0.0
  */
 class ManjaConnector implements SingletonInterface
 {
@@ -31,7 +54,7 @@ class ManjaConnector implements SingletonInterface
      *
      * @var \ManjaServer
      */
-    protected $manjaServer = null;
+    protected $manjaServer;
 
     /**
      * The host to use for connecting.
@@ -59,7 +82,7 @@ class ManjaConnector implements SingletonInterface
      *
      * @var string
      */
-    protected $connectionPassword = '';
+    protected $connectionPW = '';
 
     /**
      * The client_id to use for connecting to the host.
@@ -115,7 +138,7 @@ class ManjaConnector implements SingletonInterface
         $this->connectionHost = $configuration['host'];
         $this->connectionPort = $configuration['port'];
         $this->connectionUsername = $configuration['username'];
-        $this->connectionPassword = $configuration['password'];
+        $this->connectionPW = $configuration['password'];
         $this->connectionClientId = $configuration['client_id'];
         $this->connectionTreeId = $configuration['tree_id'];
         $this->connectionTimeout = $configuration['timeout'];
@@ -163,10 +186,10 @@ class ManjaConnector implements SingletonInterface
             }
             if (!$valid) {
                 // Login
-                if ($this->manjaServer->Login($this->connectionUsername, $this->connectionPassword) === 0) {
+                if ($this->manjaServer->Login($this->connectionUsername, $this->connectionPW) === 0) {
                     // Check creation or edit requests of sys_file_storage with empty values to avoid error messages, returns notice
                     if (isset($_REQUEST['edit']['sys_file_storage'])) {
-                        if ($this->connectionHost && !$this->connectionUsername && !$this->connectionPassword) {
+                        if ($this->connectionHost && !$this->connectionUsername && !$this->connectionPW) {
                             $message = LocalizationUtility::translate('error.sys_file_storage.login.empty', 'fal_manja');
                             $this->addFlashMessage($message, FlashMessage::NOTICE);
                         } elseif ($this->connectionHost) {
@@ -178,7 +201,7 @@ class ManjaConnector implements SingletonInterface
                         $this->addFlashMessage($message, FlashMessage::ERROR);
                     }
                 } else {
-                    #$this->addFlashMessage('OK - FAL ManjaDriver: Login succeed 1', FlashMessage::OK);
+                    //$this->addFlashMessage('OK - FAL ManjaDriver: Login succeed 1', FlashMessage::OK);
                     $this->manjaConnection = true;
                 }
                 // Create new session
@@ -188,7 +211,7 @@ class ManjaConnector implements SingletonInterface
             }
         } else {
             // Login for each query - if no sessions. Check creation or edit requests of sys_file_storage with empty values to avoid error messages
-            if (!isset($_REQUEST['edit']['sys_file_storage']) && $this->manjaServer->Login($this->connectionUsername, $this->connectionPassword) === 0) {
+            if (!isset($_REQUEST['edit']['sys_file_storage']) && $this->manjaServer->Login($this->connectionUsername, $this->connectionPW) === 0) {
                 $message = LocalizationUtility::translate('error.sys_file_storage.login.fail.1525816288', 'fal_manja');
                 $this->addFlashMessage($message, FlashMessage::ERROR);
             } else {
@@ -226,7 +249,7 @@ class ManjaConnector implements SingletonInterface
 
     /**
      * Returns Manja connection status
-     * 
+     *
      * @return bool
      */
     public function getConnectionStatus()

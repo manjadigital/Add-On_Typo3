@@ -29,46 +29,31 @@ namespace Jokumer\FalManja\Driver;
  ***/
 
 /**
- * ManjaDriver
+ * FalManja
  *
- * @since   1.1.0
- * @since   2.0.0 moved some functionality to abstract class and made this final
- * @since   2.0.0 added function to receive metadata for any document from the manja server
+ * only purpose of this class is, to define constants
+ * which might be used in different classes.
+ * So no multiple declarations in different classes are needed.
+ * Using constants of a class outside the class itself
+ * should be considered bad practice
+ *
+ * @since   2.0.0 introduced first time
  */
-final class ManjaDriver extends AbstractManjaDriver
+final class FalManja
 {
 
     /**
-     * getDocumentMetaData
-     *
-     * returns the mtea properties for a manja document
-     *
-     * @param string $fileIdentifier
-     * @param array $metaIds
-     * @return array
+     * @const string
      */
-    public function getDocumentMetaData(
-        string $fileIdentifier,
-        array $metaIds
-    ): array {
-        $metaData = [];
+    public const DRIVER_TYPE = 'fal_manja';
 
-        if ($fileIdentifier === '' || count($metaIds) === 0) {
-            return $metaData;
-        }
+    /**
+     * @const string
+     */
+    public const DRIVER_SHORT_NAME = 'fal_manja';
 
-        $nodeId = $this->getDocumentIdByIdentifier($fileIdentifier);
-
-        if ($nodeId === null) {
-            return $metaData;
-        }
-
-        $metaData = $this->getManjaServer()
-            ->MediaMetaList(
-                [$nodeId],
-                $metaIds
-            );
-
-        return $metaData[$nodeId] ?? $metaData;
-    }
+    /**
+     * @const string
+     */
+    public const PROCESSING_FOLDER_DEFAULT = '0:/typo3temp/assets/_processed_manja';
 }

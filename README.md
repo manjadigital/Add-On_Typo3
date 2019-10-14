@@ -6,7 +6,8 @@ Includes Manja API 4.0
 
 ## Requirements
 
-TYPO3 CMS 7LTS, 8LTS & 9LTS
+* TYPO3 CMS 8LTS or 9LTS
+* PHP >= 7.2
 
 ## License
 
@@ -49,13 +50,20 @@ Normally folder `fileadmin` is auto created and the default storage.
 
 Checkbox for `Automaticly extract metadata after upload` is enabled by default.
 
-Enter `Folder for manipulated and temporary images etc.` with `0:/typo3temp/assets/_processed_` for temporary folder of processed files.  
-Any file from Manja server which is used in any modified versions (croped, resized, etc.) will be stored automaticly by TYPO3 in this folder. 
+Enter `Folder for manipulated and temporary images etc.` for temporary folder of processed files. The entered value needs to be in the form `{storageId}:/{path/tho/folder}`
+where {storageId} must be the ID of a writable storage. If you leave it empty, or set it to a wrong value, a warning is shown and a default value of `0:/typo3temp/assets/_processed_` will be used.
+Any file from Manja server which is used in any modified versions (croped, resized, etc.) will be stored automaticly by TYPO3 in this folder.
 
 ![AddFileStorageSettings](Resources/Public/Documentation/04_AddFileStorageSettings.png)  
 _Add file storage settings_
 
 Checkbox for `is writable` in tab `Access capabilities` has no effect, cause this file storage driver does not support modification of files at Manja server via TYPO3 backend.
+
+#### Configure Mapping of metadata
+
+If any document is loaded from the Manja Server to TYPO3, the extension downloads also basic Metadata Fields of the document and writes them into TYPO3 Database. The field Mapping has a defaulot configuration, you might want to change this in Tab `Metadata`.
+![ConfigureMetaDataMapping](Resources/Public/Documentation/04_02_AddFileStorageSettings.png)  
+_Configure MetaData Mapping_
 
 ### Add file mount and access for editors
 
@@ -93,7 +101,17 @@ Such files and folders can be reached also in `Filebrowser`, which comes up, if 
 
 Files and folders from Manja Server are readable only and not editable via TYPO3 - therefore all folders has a locked symbol.
 
-The search in `Filelist` and `Filebrowser` searches for file name only per default in TYPO3. To search and sort by further informations you need a thirdparty extension for your TYPO3 installation. 
+The search in `Filelist` and `Filebrowser` searches for file name only per default in TYPO3. To search and sort by further informations you need a thirdparty extension for your TYPO3 installation.
+
+## Changelog ###
+### 2.0.0 ###
+**BREAKING CHANGES**
+* [TASK] Drop support for TYPO3 < 8.7 and PHP < 7.2
+
+**OTHER CHANGES**
+* [FEATURE] Add metaData Mapping to driver configuration
+* [FIX] Fix problems with _\_processed_\_ folder
+
 
 ## Development
 
@@ -110,3 +128,4 @@ Jörg Kummer service@enobe.de
 
 Private repository at [gitlab](https://manjagit.virtomain.de/manja/Add-On_Typo3) during development.  
 A public repository is planned by manjadigital.
+
