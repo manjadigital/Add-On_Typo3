@@ -46,7 +46,7 @@ call_user_func(
             $GLOBALS['TYPO3_CONF_VARS']['SYS']['caching']['cacheConfigurations'][$extKey] = [
                 'backend' => \TYPO3\CMS\Core\Cache\Backend\TransientMemoryBackend::class,
                 'options' => [
-                    'defaultLifetime' => 0
+                    'defaultLifetime' => \TYPO3\CMS\Core\Cache\Backend\Typo3DatabaseBackend::UNLIMITED_LIFETIME
                 ],
             ];
         }
