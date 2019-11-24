@@ -30,7 +30,7 @@ defined('TYPO3_MODE') or die();
 use TYPO3\CMS\Extbase\SignalSlot\Dispatcher;
 
 call_user_func(
-    static function () {
+    function () {
         $extKey = 'fal_manja';
         $extPath = \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::siteRelPath($extKey);
 
