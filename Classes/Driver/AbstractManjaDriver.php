@@ -143,7 +143,9 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver
         // Get cache
         $this->objectManager = GeneralUtility::makeInstance(ObjectManager::class);
         $this->cacheManager = $this->objectManager->get(CacheManager::class);
-        $this->cache = $this->cacheManager->getCache('fal_manja');
+        if ($this->cacheManager->hasCache('fal_manja')) {
+            $this->cache = $this->cacheManager->getCache('fal_manja');
+        }
         // Process connection to manja - instantiates manja server class
         $this->manjaConnector = new ManjaConnector($this->configuration);
         $this->manjaServer = $this->manjaConnector->processConnection();
