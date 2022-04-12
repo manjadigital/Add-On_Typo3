@@ -136,15 +136,15 @@ class ManjaConnector implements SingletonInterface
     public function __construct(array $configuration = [])
     {
         $this->connectionHost = $configuration['host'];
-        $this->connectionPort = $configuration['port'];
+        $this->connectionPort = (int)$configuration['port'];
         $this->connectionUsername = $configuration['username'];
         $this->connectionPW = $configuration['password'];
         $this->connectionClientId = $configuration['client_id'];
-        $this->connectionTreeId = $configuration['tree_id'];
-        $this->connectionTimeout = $configuration['timeout'];
-        $this->connectionStreamTimeout = $configuration['stream_timeout'];
-        $this->connectionUseSSL = $configuration['use_ssl'];
-        $this->connectionUseSessions = $configuration['use_session'];
+        $this->connectionTreeId = (int)$configuration['tree_id'];
+        $this->connectionTimeout = (int)$configuration['timeout'];
+        $this->connectionStreamTimeout = (int)$configuration['stream_timeout'];
+        $this->connectionUseSSL = (bool)$configuration['use_ssl'];
+        $this->connectionUseSessions = (bool)$configuration['use_session'];
     }
 
     /**
@@ -175,13 +175,14 @@ class ManjaConnector implements SingletonInterface
         if ($this->connectionUseSessions) {
             // Use sessions - a session_id will be tracked in a cookie
             $valid = false;
-            $session_id = isset($_COOKIE['mj_session_id']) ? $_COOKIE['mj_session_id'] : '';
+            $session_cookie_name = $this->getSessionCookieName();
+            $session_id = isset($_COOKIE[$session_cookie_name]) ? $_COOKIE[$session_cookie_name] : '';
             if ($session_id != '') {
                 // Try to resume a session
-                if ($this->manjaServer->SessionResume($session_id) !== false) {
+                if ( ($tmp=$this->manjaServer->SessionResume($session_id)) !== false) {
                     $valid = true;
                     $this->manjaConnection = true;
-                    setcookie('mj_session_id', $session_id, time() + 86400, '/');
+                    $this->setSessionCookie($session_id,(int)$tmp['timeout']);
                 }
             }
             if (!$valid) {
@@ -206,8 +207,7 @@ class ManjaConnector implements SingletonInterface
                 }
                 // Create new session
                 $tmp = $this->manjaServer->SessionCreate();
-                $session_id = $tmp['session_id'];
-                setcookie('mj_session_id', $session_id, time() + 86400, '/');
+                $this->setSessionCookie($tmp['session_id'],(int)$tmp['timeout']);
             }
         } else {
             // Login for each query - if no sessions. Check creation or edit requests of sys_file_storage with empty values to avoid error messages
@@ -223,6 +223,65 @@ class ManjaConnector implements SingletonInterface
         $this->manjaServer->SetDieOnError(false);
         return $this->manjaServer;
     }
+
+
+    /**
+     * Get name of session cookie.
+     * 
+     * @return string
+     */
+    private function getSessionCookieName() : string {
+        return 'mjtypo3_'.$this->connectionClientId.'_s';
+    }
+
+
+    /**
+     * Set session cookie in HTTP response to client
+     * 
+	 * @param string $value                     cookie value (session id)
+	 * @param int|null $expire_dt_iv            expiration interval in seconds
+     */
+    private function setSessionCookie( string $value, int $expire_dt_iv=null ) {
+
+        // TODO: use **actual** base url path
+        $cookie_path = GeneralUtility::getIndpEnv('TYPO3_SITE_PATH');
+        
+        $cookie_name = $this->getSessionCookieName();
+
+        // see https://www.php.net/manual/en/function.setcookie.php for details on cookie options
+        $domain = '';
+
+        // httponly flag: always true
+        $httponly = true;
+
+        // Secure flag
+        $secure = GeneralUtility::getIndpEnv('TYPO3_SSL');
+
+        // SameSite attr
+        $samesite = 'Lax';  // Lax, Strict or None
+
+        // send cookie to client
+        if( version_compare(PHP_VERSION,'7.3','>=') ) {
+            $options = [
+                'expires' => $expire_dt_iv===null||$expire_dt_iv===0 ? 0 : (time()+$expire_dt_iv),
+                'path' => $cookie_path,
+                'domain' => $domain,
+                'secure' => $secure,
+                'httponly' => $httponly,
+                'samesite' => $samesite,
+            ];
+            setcookie( $cookie_name, $value, $options );
+        } else {
+            $samesite_hack = '; SameSite='.$samesite;
+            setcookie( $cookie_name, $value, $expire_dt_iv===null||$expire_dt_iv===0 ? 0 : (time()+$expire_dt_iv), $cookie_path.$samesite_hack, $domain, $secure, $httponly );
+        }
+
+        // update state of cookie superglobal for current request
+        if( $value===false || !isset($value[0]) || ($expire_dt_iv!==null && $expire_dt_iv<0) ) unset($_COOKIE[$cookie_name]);
+        else $_COOKIE[$cookie_name] = $value;
+    }
+
+
 
     /**
      * Error callback
