@@ -54,7 +54,7 @@ call_user_func(
         }
 
         \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addPageTSConfig(
-            '<INCLUDE_TYPOSCRIPT: source="FILE:EXT:Configuration/TSconfig/Static/BackendForms.ts">'
+            '<INCLUDE_TYPOSCRIPT: source="FILE:EXT:fal_manja/Configuration/TSconfig/Static/BackendForms.ts">'
         );
 
         /* @var \TYPO3\CMS\Extbase\SignalSlot\Dispatcher $signalSlotDispatcher */

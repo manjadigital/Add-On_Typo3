@@ -34,7 +34,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 call_user_func(static function () {
     $extKey = 'fal_manja';
-    $lang = 'LLL:EXT:Resources/Private/Language/locallang_be.xlf:';
+    $lang = 'LLL:EXT:fal_manja/Resources/Private/Language/locallang_be.xlf:';
 
     //## extend TCA for file metadata
     $tempColumns = [
