@@ -4,29 +4,6 @@
 --------------------------------------------------------------------------------
 ------------------------------------------------------------------------------*/
 
-// remove magic_quotes, when the setting is in effect - inefficient, but necessary
-if (get_magic_quotes_gpc()) {
-    function undoMagicQuotes($array, $topLevel=true)
-    {
-        $newArray = [];
-        foreach ($array as $key => $value) {
-            if (!$topLevel) {
-                $key = stripslashes($key);
-            }
-            if (is_array($value)) {
-                $newArray[$key] = undoMagicQuotes($value, false);
-            } else {
-                $newArray[$key] = stripslashes($value);
-            }
-        }
-        return $newArray;
-    }
-    $_GET = undoMagicQuotes($_GET);
-    $_POST = undoMagicQuotes($_POST);
-    $_COOKIE = undoMagicQuotes($_COOKIE);
-    $_REQUEST = undoMagicQuotes($_REQUEST);
-}
-
 // automatically normalize all request input data to unicode NFC
 if (!class_exists('Normalizer')) {
     die('php intl module is required');
