@@ -33,7 +33,7 @@ require $_ENV['TYPO3_PATH_ROOT'].'/typo3conf/ext/fal_manja/.Build/vendor/autoloa
 use TYPO3\CMS\Extbase\SignalSlot\Dispatcher;
 
 call_user_func(
-    static function () {
+    function () {
         $extKey = 'fal_manja';
 
         // Register driver
