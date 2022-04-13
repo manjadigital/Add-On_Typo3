@@ -22,8 +22,10 @@
     "source": "https://manjagit.virtomain.de/manja/Add-On_Typo3"
   },
   "require": {
-    "typo3/cms-backend": "^10.4 || ^11.5",
-    "typo3/cms-core": "^10.4 || ^11.5"
+    "psr/http-message": "^1.0",
+    "typo3/cms-backend": "^10.4",
+    "typo3/cms-core": "^10.4",
+    "typo3/cms-extbase": "^10.4"
   },
   "replace": {
     "typo3-ter/ext-key": "self.version"
@@ -33,7 +35,10 @@
       "Jokumer\\FalManja\\": "Classes/"
     },
     "classmap": [
-      "Resources/Private/Vendor/manja-api-4.0"
+      "Resources/Private/Vendor/manja-api-4.39"
+    ],
+    "files": [
+      "Resources/Private/Vendor/manja-api-4.39/util/util.php"
     ]
   },
   "config": {

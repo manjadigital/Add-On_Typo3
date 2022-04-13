@@ -65,9 +65,7 @@ abstract class AbstractFileIndexRepository
      *
      * @param int $storageId
      */
-    public function initialize(
-        int $storageId
-    ): void {
+    public function initialize( int $storageId ) : void {
         $this->initializeStorage($storageId);
         if ($this->storage !== null) {
             $this->configuration = $this->storage->getConfiguration();
@@ -88,9 +86,7 @@ abstract class AbstractFileIndexRepository
      *
      * @param int $storageId
      */
-    protected function initializeStorage(
-       int $storageId
-    ): void {
+    protected function initializeStorage( int $storageId ) : void {
         $storageObject = ResourceFactory::getInstance()->getStorageObject($storageId);
         if ($storageObject->getDriverType() === FalManja::DRIVER_TYPE) {
             $this->storage = $storageObject;
@@ -100,19 +96,18 @@ abstract class AbstractFileIndexRepository
     /**
      * Get meta data repository
      *
-     * @return \TYPO3\CMS\Core\Resource\Index\MetaDataRepository
+     * @return MetaDataRepository
      */
-    protected function getMetaDataRepository(
-    ): MetaDataRepository {
+    protected function getMetaDataRepository() : MetaDataRepository {
         /** @var MetaDataRepository $metaDataRepository */
-        return GeneralUtility::makeInstance(MetaDataRepository::class);
+        $metaDataRepository = GeneralUtility::makeInstance(MetaDataRepository::class);
+        return $metaDataRepository;
     }
 
     /**
      * initializeManjaDriver
      */
-    protected function initializeManjaDriver(
-    ): void {
+    protected function initializeManjaDriver() : void {
         $objectManager = GeneralUtility::makeInstance(ObjectManager::class);
         $this->manjaDriver = $objectManager->get(ManjaDriver::class, $this->configuration);
         if ($this->manjaDriver !== null) {
