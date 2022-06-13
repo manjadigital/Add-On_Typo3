@@ -27,12 +27,14 @@ defined('TYPO3_MODE') or die();
  *
  ***/
 
+require $_ENV['TYPO3_PATH_ROOT'].'/typo3conf/ext/fal_manja/.Build/vendor/autoload.php';
+
+
 use TYPO3\CMS\Extbase\SignalSlot\Dispatcher;
 
 call_user_func(
-    static function () {
+    function () {
         $extKey = 'fal_manja';
-        $extPath = \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::siteRelPath($extKey);
 
         // Register driver
         $GLOBALS['TYPO3_CONF_VARS']['SYS']['fal']['registeredDrivers'][$extKey] = [
@@ -52,7 +54,7 @@ call_user_func(
         }
 
         \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addPageTSConfig(
-            '<INCLUDE_TYPOSCRIPT: source="FILE:' . $extPath . 'Configuration/TSconfig/Static/BackendForms.ts">'
+            '<INCLUDE_TYPOSCRIPT: source="FILE:EXT:fal_manja/Configuration/TSconfig/Static/BackendForms.ts">'
         );
 
         /* @var \TYPO3\CMS\Extbase\SignalSlot\Dispatcher $signalSlotDispatcher */

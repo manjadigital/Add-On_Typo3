@@ -94,10 +94,16 @@ final class FileIndexRepository extends AbstractFileIndexRepository
         if ($data['type'] === File::FILETYPE_IMAGE) {
             $file = $this->storage->getFile($data['identifier']);
             $fileNameAndPath = $file->getForLocalProcessing(false);
-            /** @var ImageInfo $imageInfo */
-            $imageInfo = GeneralUtility::makeInstance(ImageInfo::class, $fileNameAndPath);
-            $t3MetaData['width'] = $imageInfo->getWidth();
-            $t3MetaData['height'] = $imageInfo->getHeight();
+
+            try {
+                /** @var ImageInfo $imageInfo */
+                $imageInfo = GeneralUtility::makeInstance(ImageInfo::class, $fileNameAndPath);
+                $t3MetaData['width'] = $imageInfo->getWidth();
+                $t3MetaData['height'] = $imageInfo->getHeight();
+            } catch( \Throwable $e )  {
+                // ignore these errors
+            }
+
         }
 
         $metaDataRepository->update($data['uid'], $t3MetaData);

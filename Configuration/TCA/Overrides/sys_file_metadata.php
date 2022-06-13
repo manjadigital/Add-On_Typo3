@@ -34,8 +34,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 call_user_func(static function () {
     $extKey = 'fal_manja';
-    $extPath = \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::siteRelPath($extKey);
-    $lang = 'LLL:' . $extPath . 'Resources/Private/Language/locallang_be.xlf:';
+    $lang = 'LLL:EXT:fal_manja/Resources/Private/Language/locallang_be.xlf:';
 
     //## extend TCA for file metadata
     $tempColumns = [
@@ -64,9 +63,45 @@ call_user_func(static function () {
                 'eval' => 'trim'
             ],
         ],
+        'keywords'    => [
+            'exclude' => false,
+            'label'   => $lang . 'sys_file_metadata.keywords',
+            'config'  => [
+                'type' => 'input',
+                'size' => 30,
+                'eval' => 'trim'
+            ],
+        ],
         'contributor' => [
             'exclude' => false,
             'label'   => $lang . 'sys_file_metadata.contributor',
+            'config'  => [
+                'type' => 'input',
+                'size' => 30,
+                'eval' => 'trim'
+            ],
+        ],
+        'publisher' => [
+            'exclude' => false,
+            'label'   => $lang . 'sys_file_metadata.publisher',
+            'config'  => [
+                'type' => 'input',
+                'size' => 30,
+                'eval' => 'trim'
+            ],
+        ],
+        'copyright' => [
+            'exclude' => false,
+            'label'   => $lang . 'sys_file_metadata.copyright',
+            'config'  => [
+                'type' => 'input',
+                'size' => 30,
+                'eval' => 'trim'
+            ],
+        ],
+        'creator' => [
+            'exclude' => false,
+            'label'   => $lang . 'sys_file_metadata.creator',
             'config'  => [
                 'type' => 'input',
                 'size' => 30,
@@ -96,12 +131,12 @@ call_user_func(static function () {
     \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTCAcolumns('sys_file_metadata', $tempColumns);
     \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addToAllTCAtypes(
         'sys_file_metadata',
-                                                                         'is_manja, subject, coverage, contributor, created, changed',
+                                                                         'is_manja, subject, coverage, creator, publisher, contributor, copyright, keywords, created, changed',
                                                                          '',
         'after:alternative'
     );
 
-    $GLOBALS['TCA']['sys_file_metadata']['interface']['showRecordFieldList'] .= 'subject, coverage, contributor, created, changed';
+    $GLOBALS['TCA']['sys_file_metadata']['interface']['showRecordFieldList'] .= 'subject, coverage, creator, publisher, contributor, copyright, keywords, created, changed';
 
     /**
      *  using subtype_value_field to hide all

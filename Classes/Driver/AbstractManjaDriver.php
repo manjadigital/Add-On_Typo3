@@ -28,20 +28,21 @@ namespace Jokumer\FalManja\Driver;
  *
  ***/
 
+// use Psr\Http\Message\ResponseInterface;
 use Jokumer\FalManja\Service\ManjaConnector;
+use MjCPath;
+// use TYPO3\CMS\Core\Http\Response;
 use TYPO3\CMS\Core\Cache\CacheManager;
 use TYPO3\CMS\Core\Cache\Frontend\VariableFrontend;
 use TYPO3\CMS\Core\Resource\Driver\AbstractHierarchicalFilesystemDriver;
+// use TYPO3\CMS\Core\Resource\Driver\StreamableDriverInterface;
 use TYPO3\CMS\Core\Resource\Exception\ExistingTargetFileNameException;
-use TYPO3\CMS\Core\Resource\Exception\FileDoesNotExistException;
 use TYPO3\CMS\Core\Resource\Exception\FileOperationErrorException;
 use TYPO3\CMS\Core\Resource\Exception\FolderDoesNotExistException;
 use TYPO3\CMS\Core\Resource\Exception\InvalidFileException;
 use TYPO3\CMS\Core\Resource\Exception\InvalidFileNameException;
-use TYPO3\CMS\Core\Resource\Exception\InvalidPathException;
 use TYPO3\CMS\Core\Resource\ResourceStorage;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Core\Utility\PathUtility;
 use TYPO3\CMS\Extbase\Object\ObjectManager;
 
 /**
@@ -49,7 +50,7 @@ use TYPO3\CMS\Extbase\Object\ObjectManager;
  *
  * @since 2.0.0 introduced first time
  */
-abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver
+abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver //implements StreamableDriverInterface
 {
 
     /**
@@ -69,7 +70,7 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver
     /**
      * API manja repository instance
      *
-     * @var \ManjaServer
+     * @var \MjCRepository
      */
     protected $manjaRepository;
 
@@ -117,7 +118,7 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver
         array $configuration = []
     ) {
         parent::__construct($configuration);
-        $this->capabilities = ResourceStorage::CAPABILITY_BROWSABLE | ResourceStorage::CAPABILITY_PUBLIC; // Exclude ResourceStorage::CAPABILITY_WRITABLE
+        $this->capabilities = ResourceStorage::CAPABILITY_BROWSABLE | ResourceStorage::CAPABILITY_PUBLIC | ResourceStorage::CAPABILITY_HIERARCHICAL_IDENTIFIERS;
     }
 
     /**
@@ -133,24 +134,21 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver
     /**
      * Initializes this object. This is called by the storage after the driver
      * has been attached.
-     *
-     * Require once manja utility php file by instantiate any class from it.
-     * (Here "mjException" is instantiated)
-     * Otherwise it needs to be required by path, which will not be future proof
      */
     public function initialize()
     {
         // Get cache
         $this->objectManager = GeneralUtility::makeInstance(ObjectManager::class);
         $this->cacheManager = $this->objectManager->get(CacheManager::class);
-        $this->cache = $this->cacheManager->getCache('fal_manja');
+        if ($this->cacheManager->hasCache('fal_manja')) {
+            $this->cache = $this->cacheManager->getCache('fal_manja');
+        }
         // Process connection to manja - instantiates manja server class
         $this->manjaConnector = new ManjaConnector($this->configuration);
         $this->manjaServer = $this->manjaConnector->processConnection();
         if ($this->manjaConnector->getConnectionStatus()) {
             // Instantiate manja repository model class
             $this->manjaRepository = GeneralUtility::makeInstance(\MjCRepository::class, $this->manjaServer);
-            GeneralUtility::makeInstance('mjException', '');
         }
     }
 
@@ -190,29 +188,30 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver
         return $this->getRootLevelFolder();
     }
 
-    /**
-     * Checks if a folder exists.
-     *
-     * @param string $folderIdentifier
-     * @return bool
-     */
-    public function folderExists(
-        $folderIdentifier
-    ) {
-        if ($folderIdentifier === self::ROOT_FOLDER_IDENTIFIER) {
-            return true;
-        }
 
-        $folderExists = false;
-        if ($this->manjaRepository instanceof \MjCRepository) {
-            /** @var \MjCFolder $folder */
-            $folder = $this->manjaRepository->GetNodeByPath($folderIdentifier);
-            if ($folder instanceof \MjCFolder && $folder->IsFolder()) {
-                $folderExists = true;
-            }
-        }
-        return $folderExists;
+    // // quick & dirty cache of nodes by their canonical path:
+    // private $_node_by_path_cache = [];
+    // private function add2NodeCache( \MjCPath $path, \MjCNode $node ) {
+    //     $this->_node_by_path_cache[ (string)$path ] = $node;
+    // }
+    // private function getFromNodeCache( \MjCPath $path ) : ?\MjCNode {
+    //     return $this->_node_by_path_cache[(string)$path] ?? null;
+    // }
+    // private function getNodeByPathWithCache( \MjCPath $path ) : ?\MjCNode {
+    //     if( ($node=$this->getFromNodeCache($path))!==null ) return $node;
+    //     if( ($node=$this->manjaRepository->GetNodeByPath($path))===null ) return null;
+    //     $this->add2NodeCache($path,$node);
+    //     return $node;
+    // } 
+
+
+
+
+    private static function getUnixFromManjaTimestamp( string $manja_ts ) : int {
+        $tm = new \DateTime($manja_ts,new \DateTimeZone('UTC'));
+		return $tm->getTimestamp();
     }
+
 
     /**
      * Returns information about a folder
@@ -223,13 +222,61 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver
      */
     public function getFolderInfoByIdentifier($folderIdentifier)
     {
-        $folderIdentifier = $this->canonicalizeAndCheckFolderIdentifier($folderIdentifier);
-        return [
-            'identifier' => $folderIdentifier,
-            'name' => PathUtility::basename($folderIdentifier),
-            'storage' => $this->storageUid
-        ];
+        try {
+            $folderPath = new \MjCPath($folderIdentifier);
+            $node = $this->manjaRepository->GetNodeByPath($folderPath);
+            return [
+                'identifier' => $folderPath->GetFolderPathString(),
+                'name' => $node->GetAttribute('filename'),  //$folderPath->GetBasename(),
+                'ctime' => self::getUnixFromManjaTimestamp($node->GetAttribute('created')),
+                'mtime' => self::getUnixFromManjaTimestamp($node->GetAttribute('modified')),
+                'storage' => $this->storageUid
+            ];
+        } catch( \MjCObjectNotFoundException $e ) {
+            throw new FolderDoesNotExistException( 'Folder "' . $folderIdentifier . '" does not exist.', 1314516810, $e );
+        }
     }
+
+    /**
+     * Returns information about a file.
+     *
+     * @param string $fileIdentifier
+     * @param array $propertiesToExtract Array of properties which are be extracted
+     *                                   If empty all will be extracted
+     * @return array
+     * @throws \InvalidArgumentException
+     */
+    public function getFileInfoByIdentifier($fileIdentifier, array $propertiesToExtract = [])
+    {
+        try {
+            $file = $this->getDocumentByIdentifier($fileIdentifier);
+            if ($file instanceof \MjCDocument) {
+                return [
+                    'name' => $file->GetAttribute('filename'),
+                    'identifier' => $fileIdentifier,
+                    'identifier_hash' => $this->hashIdentifier($fileIdentifier),
+                    'folder_hash' => $this->hashIdentifier((string)$file->GetPath()->GetDirname()),
+                    'atime' => $GLOBALS['EXEC_TIME'],
+                    'mtime' => self::getUnixFromManjaTimestamp($file->GetAttribute('modified')),
+                    'ctime' => self::getUnixFromManjaTimestamp($file->GetAttribute('created')),
+                    'mimetype' => $file->GetAttribute('content_type'),
+                    'size' => (int)$file->GetAttribute('content_length'),
+                    'storage' => $this->storageUid,
+                    'fal_manja_document_id' => $file->GetAttribute('document_id')
+                ];
+            }
+        } catch( \MjCObjectNotFoundException $e ) {
+            throw new \InvalidArgumentException( 'File "' . $fileIdentifier . '" does not exist.', 1314516809, $e );
+        }
+    }
+
+
+
+
+
+
+
+
 
     /**
      * Returns the permissions of a file/folder as an array
@@ -242,7 +289,7 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver
     {
         return [
             'r' => true,
-            'w' => true
+            'w' => false
         ];
     }
 
@@ -281,7 +328,8 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver
      */
     public function getFileInFolder($fileName, $folderIdentifier)
     {
-        return $this->canonicalizeAndCheckFileIdentifier($folderIdentifier . '/' . $fileName);
+        $folderPath = new \MjCPath($folderIdentifier);
+        return (string)$folderPath->GetAppended($fileName);
     }
 
     /**
@@ -299,6 +347,7 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver
      *                     should fall back to "name".
      * @param bool $sortRev TRUE to indicate reverse sorting (last to first)
      * @return array of FileIdentifiers
+     * @throws \RuntimeException
      */
     public function getFilesInFolder(
         $folderIdentifier,
@@ -309,23 +358,33 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver
         $sort = '',
         $sortRev = false
     ) {
-        $files = [];
-        if ($this->manjaRepository instanceof \MjCRepository) {
-            /** @var \MjCFolder $node */
-            $node = $this->manjaRepository->GetNodeByPath($folderIdentifier);
-            if ($node->GetTotalDocumentCount()) {
-                $nodeFiles = $node->GetDocuments();
-                if (!empty($nodeFiles)) {
-                    /** @var \MjCDocument $nodeFile */
-                    foreach ($nodeFiles as $nodeFile) {
-                        $currentFileIdentifier = $folderIdentifier . $nodeFile->GetPathSegment(); // Prepend parent folder identifier
-                        $files[] = $currentFileIdentifier;
-                    }
-                }
-            }
-        }
-        return $files;
+        if( !($this->manjaRepository instanceof \MjCRepository) ) return [];
+
+        if( $recursive ) throw new \RuntimeException('Recursive getFilesInFolder() is not implemented yet.' );
+
+        $folderPath = new MjCPath($folderIdentifier);
+
+        /** @var \MjCFolder $folder */
+        $folder = $this->manjaRepository->GetNodeByPath($folderPath);
+
+        // whether result list can be sliced early (or late after sort and filtering in getIdentifiersFromResultList)
+        $pre_sliced = false;    //!$filenameFilterCallbacks && !$sort;
+
+        $documents = $folder->GetDocuments(
+            $pre_sliced ? (int)$start : 0,
+            $pre_sliced ? ( (int)$numberOfItems===0 ? 2147483637 : (int)$numberOfItems ) : 2147483637
+        );
+
+        $sortedResult = $this->getSortedResultList($documents,$sort,$sortRev);
+        return $this->getIdentifiersFromResultList(
+            $folderPath,
+            $sortedResult,
+            $filenameFilterCallbacks,
+            $pre_sliced?false:$start,
+            $pre_sliced?false:$numberOfItems
+        );
     }
+
 
     /**
      * Returns the identifier of a folder inside the folder
@@ -336,8 +395,10 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver
      */
     public function getFolderInFolder($folderName, $folderIdentifier)
     {
-        return $this->canonicalizeAndCheckFolderIdentifier($folderIdentifier . '/' . $folderName);
+        $folderPath = new MjCPath($folderIdentifier);
+        return $folderPath->GetAppended($folderName)->GetFolderPathString();
     }
+
 
     /**
      * Returns a list of folders inside the specified path
@@ -354,6 +415,7 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver
      *                     should fall back to "name".
      * @param bool $sortRev TRUE to indicate reverse sorting (last to first)
      * @return array of Folder Identifier
+     * @throws \RuntimeException
      */
     public function getFoldersInFolder(
         $folderIdentifier,
@@ -364,21 +426,166 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver
         $sort = '',
         $sortRev = false
     ) {
-        $folders = [];
-        if ($this->manjaRepository instanceof \MjCRepository) {
-            /** @var \MjCFolder $folder */
-            $folder = $this->manjaRepository->GetNodeByPath($folderIdentifier);
-            $subFolders = $folder->GetFolders();
-            if (!empty($subFolders)) {
-                /** @var \MjCFolder $subFolder */
-                foreach ($subFolders as $subFolder) {
-                    $currentFolderIdentifier = $folderIdentifier . $subFolder->GetPathSegment(); // Prepend parent folder identifier
-                    $folders[] = $this->canonicalizeAndCheckFolderIdentifier($currentFolderIdentifier);
+        if( !($this->manjaRepository instanceof \MjCRepository) ) return [];
+
+        if( $recursive ) throw new \RuntimeException('Recursive getFoldersInFolder() is not implemented yet.' );
+
+        $folderPath = new MjCPath($folderIdentifier);
+
+        /** @var \MjCFolder $folder */
+        $folder = $this->manjaRepository->GetNodeByPath($folderPath);
+
+        // whether result list can be sliced early (or late after sort and filtering in getIdentifiersFromResultList)
+        $pre_sliced = false;    //!$folderNameFilterCallbacks && !$sort;
+
+        $subFolders = $folder->GetFolders(
+            $pre_sliced ? (int)$start : 0,
+            $pre_sliced ? ( (int)$numberOfItems===0 ? 2147483637 : (int)$numberOfItems ) : 2147483637
+        );
+
+        $sortedResult = $this->getSortedResultList($subFolders,$sort,$sortRev);
+        return $this->getIdentifiersFromResultList(
+            $folderPath,
+            $sortedResult,
+            $folderNameFilterCallbacks,
+            $pre_sliced?false:$start,
+            $pre_sliced?false:$numberOfItems
+        );
+    }
+
+
+
+    /**
+     * Sort the directory entries by a certain key
+     *
+     * @param \MjCNode[] $entries           Array of nodes
+     * @param string $sort Property name used to sort the items.
+     *                     Among them may be: '' (empty, no sorting), name,
+     *                     fileext, size, tstamp and rw.
+     *                     If a driver does not support the given property, it
+     *                     should fall back to "name".
+     * @param bool $sortRev TRUE to indicate reverse sorting (last to first)
+     * @return array Sorted array of nodes
+     */
+    protected function  getSortedResultList( array $entries, $sort = '', $sortRev = false ) : array
+    {
+        $entriesToSort = [];
+        /** @var \MjCNode $entry */
+        foreach ($entries as $entry) {
+            $isFolder = $entry->IsFolder();
+            $fullPath = $entry->GetPath();
+            $fullPathStr = $isFolder ? $fullPath->GetFolderPathString() : (string)$fullPath;
+
+            switch ($sort) {
+            case 'size':
+                $sortingKey = '0';
+                if( !$isFolder ) $sortingKey = (int)$entry->GetAttribute('content_length');
+                // Add a character for a natural order sorting
+                $sortingKey .= 'b';
+                break;
+            case 'rw':
+                $perms = $this->getPermissions($fullPathStr);
+                $sortingKey = ( $perms['r'] ? 'R' : '' ) . ($perms['w'] ? 'W' : '');
+                break;
+            case 'fileext':
+                $sortingKey = mj_str_last_part('.',$fullPathStr);
+                break;
+            case 'tstamp':
+                $sortingKey = $entry->GetAttribute('modified');
+                break;
+            case 'name':
+            case 'file':
+            default:
+                $sortingKey = $fullPathStr;
+            }
+            $i = 0;
+            while( isset($entriesToSort[$sortingKey.$i]) ) {
+                $i++;
+            }
+            $entriesToSort[$sortingKey.$i] = $entry;
+        }
+        uksort($entriesToSort, 'strnatcasecmp');
+        return $sortRev ? array_reverse($entriesToSort) : $entriesToSort;
+    }
+
+
+
+    /**
+     * Get list of identifiers from list of nodes. Also, apply filters and slice nodes.
+     * 
+     * @param \MjCPath|null $containingFolderPath     null or path to folder containing all results
+     * @param \MjCNode[] $entries                Array of nodes
+     * @param array $filterMethods               Filter methods used to filter the items
+     * @param int|bool $start
+     * @param int|bool $numberOfItems
+     * @param string[]                           list of identifiers
+     */
+    protected function getIdentifiersFromResultList( ?\MjCPath $containingFolderPath, array $entries, array $filterMethods, $start=0, $numberOfItems=0 ) : array
+    {
+        $identifiers = [];
+        foreach ($entries as $entry) {
+            $isFolder = $entry->IsFolder();
+            $fullPath = $containingFolderPath ? $containingFolderPath->GetAppended($entry->GetPathSegment()) : $entry->GetPath();
+            $fullPathStr = $isFolder ? $fullPath->GetFolderPathString() : (string)$fullPath;
+            // $this->add2NodeCache($fullPath,$entry);
+            if( $filterMethods ) {
+                $filename = $entry->GetPathSegment();
+                if ( !$this->applyFilterMethodsToDirectoryItem($filterMethods,$filename,$fullPathStr,(string)$fullPath->GetDirname()) ) {
+                    continue;
+                }
+            }
+            $identifiers[] = $fullPathStr;
+        }
+        if( $start || $numberOfItems ) return array_slice( $identifiers, (int)$start, (int)$numberOfItems===0 ? null : (int)$numberOfItems );
+        return $identifiers;
+    }
+
+
+
+
+
+
+    /**
+     * Applies a set of filter methods to a file name to find out if it should be used or not. This is e.g. used by
+     * directory listings.
+     *
+     * @param array $filterMethods The filter methods to use
+     * @param string $itemName
+     * @param string $itemIdentifier
+     * @param string $parentIdentifier
+     * @return bool
+     * @throws \RuntimeException
+     */
+    protected function applyFilterMethodsToDirectoryItem(array $filterMethods, $itemName, $itemIdentifier, $parentIdentifier) : bool
+    {
+        foreach ($filterMethods as $filter) {
+            if (is_callable($filter)) {
+                $result = call_user_func($filter, $itemName, $itemIdentifier, $parentIdentifier, [], $this);
+                // We have to use -1 as the „don't include“ return value, as call_user_func() will return FALSE
+                // If calling the method succeeded and thus we can't use that as a return value.
+                if ($result === -1) {
+                    return false;
+                }
+                if ($result === false) {
+                    throw new \RuntimeException(
+                        'Could not apply file/folder name filter ' . $filter[0] . '::' . $filter[1],
+                        1476046425
+                    );
                 }
             }
         }
-        return $folders;
+        return true;
     }
+
+
+
+
+
+
+
+
+
+
 
     /**
      * Checks if a given identifier is within a container, e.g. if
@@ -395,19 +602,11 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver
      * @return bool TRUE if $content is within or matches $folderIdentifier
      * @throws \TYPO3\CMS\Core\Resource\Exception\InvalidPathException
      */
-    public function isWithin($folderIdentifier, $identifier)
+    public function isWithin($folderIdentifier, $identifier) : bool
     {
-        $folderIdentifier = $this->canonicalizeAndCheckFolderIdentifier($folderIdentifier);
-        $entryIdentifier = $this->canonicalizeAndCheckFileIdentifier($identifier);
-        if ($folderIdentifier === $entryIdentifier) {
-            return true;
-        }
-        // File identifier canonicalization will not modify a single slash so
-        // we must not append another slash in that case.
-        if ($folderIdentifier !== '/') {
-            $folderIdentifier .= '/';
-        }
-        return GeneralUtility::isFirstPartOfStr($entryIdentifier, $folderIdentifier);
+        $folderPath = new MjCPath($folderIdentifier);
+        $checkPath = new MjCPath($identifier);
+        return mj_str_starts_with((string)$checkPath,(string)$folderPath);
     }
 
     /**
@@ -416,44 +615,43 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver
      * @param string $fileIdentifier
      * @return bool
      */
-    public function fileExists($fileIdentifier)
+    public function fileExists( $fileIdentifier ) : bool
     {
-        $file = $this->getDocumentByIdentifier($fileIdentifier);
-        if ($file instanceof \MjCDocument) {
-            return true;
+        try {
+            $file = $this->getDocumentByIdentifier($fileIdentifier);
+            return $file instanceof \MjCDocument;
+        } catch( \MjCObjectNotFoundException $e ) {
+            return false;
         }
-        return false;
     }
 
+
+
     /**
-     * Returns information about a file.
+     * Checks if a folder exists.
      *
-     * @param string $fileIdentifier
-     * @param array $propertiesToExtract Array of properties which are be extracted
-     *                                   If empty all will be extracted
-     * @return array
-     * @throws FileDoesNotExistException
+     * @param string $folderIdentifier
+     * @return bool
      */
-    public function getFileInfoByIdentifier($fileIdentifier, array $propertiesToExtract = [])
+    public function folderExists( $folderIdentifier ) : bool
     {
-        /* FALK evtl hier einbetten? */
-        $file = $this->getDocumentByIdentifier($fileIdentifier);
-        if ($file instanceof \MjCDocument) {
-            return [
-                'name' => $file->GetAttribute('filename'),
-                'identifier' => $fileIdentifier,
-                'identifier_hash' => $this->hashIdentifier($fileIdentifier),
-                'folder_hash' => $this->hashIdentifier($this->getParentFolderIdentifierOfIdentifier($fileIdentifier)),
-                'atime' => $GLOBALS['EXEC_TIME'],
-                'mtime' => strtotime($file->GetAttribute('modified')),
-                'ctime' => strtotime($file->GetAttribute('created')),
-                'mimetype' => $file->GetAttribute('content_type'),
-                'size' => (int)$file->GetAttribute('content_length'),
-                'storage' => $this->storageUid,
-                'fal_manja_document_id' => $file->GetAttribute('document_id')
-            ];
+        if ( !($this->manjaRepository instanceof \MjCRepository) ) return false;
+        if ($folderIdentifier === self::ROOT_FOLDER_IDENTIFIER) return true;
+        try {
+            $folderPath = new \MjCPath($folderIdentifier);
+            $folder = $this->manjaRepository->GetNodeByPath($folderPath);
+            return $folder instanceof \MjCFolder;
+        } catch( \MjCObjectNotFoundException $e ) {
+            return false;
         }
     }
+
+
+
+
+
+
+
 
     /**
      * Creates a hash for a file.
@@ -495,68 +693,73 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver
         /** @var \MjCDocument $document */
         $document = $this->getDocumentByIdentifier($fileIdentifier);
         if ($document instanceof \MjCDocument) {
-            $handle = fopen('php://output', 'w');
-            fwrite($handle, $document->GetContent());
-            fclose($handle);
+            $document->SendToClient();
+            // $handle = fopen('php://output', 'w');
+            // fwrite($handle, $document->GetContent());
+            // fclose($handle);
         }
     }
 
     /**
-     * Makes sure the folder identifier given as parameter is valid
+     * Returns the contents of a file. Beware that this requires to load the
+     * complete file into memory and also may require fetching the file from an
+     * external location. So this might be an expensive operation (both in terms of
+     * processing resources and money) for large files.
      *
-     * @param string $folderIdentifier The folder identifier
-     * @return string
+     * @param string $fileIdentifier
+     * @return string The file contents
      */
-    protected function canonicalizeAndCheckFolderIdentifier($folderIdentifier)
+    public function getFileContents($fileIdentifier)
     {
-        if ($folderIdentifier === '/') {
-            $canonicalizedIdentifier = $folderIdentifier;
-        } else {
-            $canonicalizedIdentifier = rtrim($folderIdentifier, '/') . '/';
+        /** @var \MjCDocument $document */
+        $document = $this->getDocumentByIdentifier($fileIdentifier);
+        if ($document instanceof \MjCDocument) {
+            return $document->GetContent();
         }
-        return $canonicalizedIdentifier;
     }
 
-    /**
-     * Makes sure the file identifier given as parameter is valid
-     *
-     * @param string $fileIdentifier The file Identifier
-     * @return string
-     * @throws InvalidPathException
-     */
-    protected function canonicalizeAndCheckFileIdentifier($fileIdentifier)
-    {
-        if ($fileIdentifier !== '') {
-            $fileIdentifier = $this->canonicalizeAndCheckFilePath($fileIdentifier);
-            $fileIdentifier = '/' . ltrim($fileIdentifier, '/');
-            if (!$this->isCaseSensitiveFileSystem()) {
-                $fileIdentifier = strtolower($fileIdentifier);
-            }
-        }
-        return $fileIdentifier;
-    }
 
-    /**
-     * Makes sure the file path given as parameter is valid
-     *
-     * @param string $filePath The file path (including the file name!)
-     * @return string
-     * @throws InvalidPathException
-     * @author Stefan Froemken <froemken@gmail.com>
-     */
-    protected function canonicalizeAndCheckFilePath($filePath)
-    {
-        $filePath = PathUtility::getCanonicalPath($filePath);
-        // filePath must be valid
-        // Special case is required by vfsStream in Unit Test context
-        if (!GeneralUtility::validPathStr($filePath)) {
-            throw new InvalidPathException(
-                'File ' . $filePath . ' is not valid (".." and "//" is not allowed in path).',
-                1519677146
-            );
-        }
-        return $filePath;
-    }
+    //TODO: 
+    // /**
+    //  * Stream file using a PSR-7 Response object.
+    //  *
+    //  * @param string $fileIdentifier
+    //  * @param array $properties
+    //  * @return ResponseInterface
+    //  */
+    // public function streamFile(string $fileIdentifier, array $properties): ResponseInterface
+    // {
+    //     ob_start();
+    //     try {
+    //         /** @var \MjCDocument $document */
+    //         $document = $this->getDocumentByIdentifier($fileIdentifier);
+    //         if ($document instanceof \MjCDocument) {
+    //             $stream_ressource = $document->GetStream();
+
+    //             $http_resp_code = http_response_code();
+    //             $http_headers = headers_list();
+
+    //             $assoc_http_headers = [];
+    //             foreach( $http_headers as $header_line ) {
+    //                 $header_parts = explode(':',$header_line,2);
+    //                 if( isset($header_parts[1]) ) {
+    //                     if( isset($assoc_http_headers[$header_parts[0]]) ) $assoc_http_headers[$header_parts[0]][] = $header_parts[1];
+    //                     else $assoc_http_headers[$header_parts[0]] = $header_parts[1];
+    //                 }
+    //             }
+
+    //             return new Response(
+    //                 new \TYPO3\CMS\Core\Http\Stream($stream_ressource,'r'),
+    //                 $http_resp_code,
+    //                 $assoc_http_headers
+    //             );
+    //         }
+    //     } finally {
+    //         ob_end_clean();
+    //     }
+
+    // }
+
 
     /**
      * Returns document object by file identifier (path)
@@ -568,34 +771,16 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver
     protected function getDocumentByIdentifier($fileIdentifier)
     {
         $document = $this->getDocumentCacheByFileIdentifier($fileIdentifier);
-
         if ($document instanceof \MjCDocument) {
             return $document;
         }
 
-        // Get from reposiotry
-        $filePath = $this->getParentFolderIdentifierOfIdentifier($fileIdentifier);
-        $fileName = PathUtility::basename($fileIdentifier);
-
-        if (
-            !$filePath ||
-            !$fileName ||
-            !($this->manjaRepository instanceof \MjCRepository)
-        ) {
+        if ( !($this->manjaRepository instanceof \MjCRepository) ) {
             return null;
         }
 
-        /** @var \MjCFolder $folder */
-        $folder = $this->manjaRepository->GetNodeByPath($filePath);
-
-        if (!($folder instanceof \MjCFolder)) {
-            return null;
-        }
-
-        /** @var \MjCDocument $file */
-        $document = $folder->GetChildByPathSegment($fileName);
-
-        if (!($document instanceof \MjCDocument)) {
+        $document = $this->manjaRepository->GetNodeByPathString($fileIdentifier);
+        if ( !($document instanceof \MjCDocument) ) {
             return null;
         }
 
@@ -619,26 +804,24 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver
         /** @var \MjCDocument $document */
         $document = $this->getDocumentByIdentifier($fileIdentifier);
         if ($document instanceof \MjCDocument) {
-            $documentId = (int)$document->GetDocumentId();
+            return (int)$document->GetDocumentId();
         }
-        return $documentId;
+        return null;
     }
 
     /**
      * Cache manja document
      *
-     * @param \MjCDocument $document
      * @param string $fileIdentifier
+     * @param \MjCDocument $document
      */
     protected function setDocumentCacheByFileIdentifier(
         $fileIdentifier,
-        \MjCDocument $document = null
+        \MjCDocument $document
     ): void {
-        if ($document !== null) {
-            $cacheIdentifier = $this->getDocumentCacheIdentifier($fileIdentifier);
-            if (!$this->cache->has($cacheIdentifier)) {
-                $this->cache->set($cacheIdentifier, $document);
-            }
+        $cacheIdentifier = $this->getDocumentCacheIdentifier($fileIdentifier);
+        if (!$this->cache->has($cacheIdentifier)) {
+            $this->cache->set($cacheIdentifier, $document);
         }
     }
 
@@ -646,15 +829,12 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver
      * Returns the cache identifier for a given file identifier
      *
      * @param string $fileIdentifier
-     * @return string
+     * @return mixed
      */
     protected function getDocumentCacheByFileIdentifier($fileIdentifier)
     {
         $cacheIdentifier = $this->getDocumentCacheIdentifier($fileIdentifier);
-        if ($this->cache->has($cacheIdentifier)) {
-            // Get from cache
-            return $this->cache->get($cacheIdentifier);
-        }
+        return ($result=$this->cache->get($cacheIdentifier))===false ? null : $result;
     }
 
     /**
@@ -680,7 +860,7 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver
         /** @var \MjCDocument $file */
         $document = $this->getDocumentByIdentifier($fileIdentifier);
 
-        if ($document === null || !($document instanceof \MjCDocument)) {
+        if ( !($document instanceof \MjCDocument) ) {
             throw new InvalidFileException(
                 'File "' . $fileIdentifier . '" has to be instance of "\MjCDocument"',
                 1519867205
@@ -688,10 +868,72 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver
         }
 
         $temporaryPath = $this->getTemporaryPathForFile($fileIdentifier);
-        file_put_contents($temporaryPath, $document->GetContent());
+        // file_put_contents($temporaryPath,$document->GetContent(),LOCK_EX);
+
+        $trg_stream = fopen($temporaryPath,'w+b');
+        if (!flock($trg_stream, LOCK_EX)) {
+			fclose($trg_stream);
+			unlink($temporaryPath);
+			throw new InvalidFileException('File "' . $fileIdentifier . '": Error while getting media item: Could not lock target file.');
+		}
+
+        $src_stream = $document->GetStream();
+        $copy_res = stream_copy_to_stream($src_stream,$trg_stream);
+        if ($copy_res === false) {
+			flock($trg_stream, LOCK_UN);
+			fclose($trg_stream);
+			unlink($temporaryPath);
+			throw new InvalidFileException('File "' . $fileIdentifier . '": Error while streaming media to file.');
+		}
+		if (!flock($trg_stream,LOCK_UN) || !fclose($trg_stream)) {
+			// Maybe it's a bit much to throw an error on that, but at least it prevents errors down the line (e.g. while trying to read during upload)
+			throw new InvalidFileException('File "' . $fileIdentifier . '": Error while getting media item: Could not unlock or close the target file.');
+		}
 
         return $temporaryPath;
     }
+
+
+
+    /**
+     * Checks if a folder contains files and (if supported) other folders.
+     *
+     * @param string $folderIdentifier
+     * @return bool TRUE if there are no files and folders within $folder
+     */
+    public function isFolderEmpty($folderIdentifier)
+    {
+        if( $this->countFoldersInFolder($folderIdentifier,false,[]) ) return false;
+        if( $this->countFilesInFolder($folderIdentifier,false,[]) ) return false;
+        return true;
+    }
+
+    /**
+     * Checks if a file inside a folder exists
+     *
+     * @param string $fileName
+     * @param string $folderIdentifier
+     * @return bool
+     */
+    public function fileExistsInFolder($fileName, $folderIdentifier)
+    {
+        $path = ( new MjCPath($folderIdentifier) )->GetAppended($fileName);
+        return $this->fileExists((string)$path);
+    }
+
+    /**
+     * Checks if a folder inside a folder exists.
+     *
+     * @param string $folderName
+     * @param string $folderIdentifier
+     * @return bool
+     */
+    public function folderExistsInFolder($folderName, $folderIdentifier)
+    {
+        $path = ( new MjCPath($folderIdentifier) )->GetAppended($folderName);
+        return $this->folderExists($path->GetFolderPathString());
+    }
+
 
     /**
      * @return \ManjaServer
@@ -749,17 +991,6 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver
      * @throws FileOperationErrorException
      */
     public function deleteFolder($folderIdentifier, $deleteRecursively = false)
-    {
-        // Feature not available
-    }
-
-    /**
-     * Checks if a folder contains files and (if supported) other folders.
-     *
-     * @param string $folderIdentifier
-     * @return bool TRUE if there are no files and folders within $folder
-     */
-    public function isFolderEmpty($folderIdentifier)
     {
         // Feature not available
     }
@@ -891,20 +1122,6 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver
     }
 
     /**
-     * Returns the contents of a file. Beware that this requires to load the
-     * complete file into memory and also may require fetching the file from an
-     * external location. So this might be an expensive operation (both in terms
-     * of processing resources and money) for large files.
-     *
-     * @param string $fileIdentifier
-     * @return string The file contents
-     */
-    public function getFileContents($fileIdentifier)
-    {
-        // Feature not available
-    }
-
-    /**
      * Sets the contents of a file to the specified value.
      *
      * @param string $fileIdentifier
@@ -916,27 +1133,4 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver
         // Feature not available
     }
 
-    /**
-     * Checks if a file inside a folder exists
-     *
-     * @param string $fileName
-     * @param string $folderIdentifier
-     * @return bool
-     */
-    public function fileExistsInFolder($fileName, $folderIdentifier)
-    {
-        // Feature not available
-    }
-
-    /**
-     * Checks if a folder inside a folder exists.
-     *
-     * @param string $folderName
-     * @param string $folderIdentifier
-     * @return bool
-     */
-    public function folderExistsInFolder($folderName, $folderIdentifier)
-    {
-        // Feature not available
-    }
 }

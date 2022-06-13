@@ -14,10 +14,10 @@ $EM_CONF[$_EXTKEY] = [
     'createDirs' => '',
     'clearCacheOnLoad' => 0,
     'lockType' => '',
-    'version' => '2.0.0',
+    'version' => '2.1.2',
     'constraints' => [
         'depends' => [
-            'typo3' => '8.7.0-9.5.99',
+            'typo3' => '10.4.0-11.5.99',
         ],
     ],
     'autoload' => [
@@ -25,7 +25,7 @@ $EM_CONF[$_EXTKEY] = [
             'Jokumer\\FalManja\\' => 'Classes',
         ],
         'classmap' => [
-            'Resources/Private/Vendor/manja-api-4.0',
+            'Resources/Private/Vendor/manja-api-4.39',
         ],
     ],
 ];
