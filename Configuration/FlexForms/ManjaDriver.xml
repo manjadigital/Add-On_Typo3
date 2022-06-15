@@ -30,7 +30,7 @@
                             </label>
                             <config>
                                 <type>input</type>
-                                <default>21</default>
+                                <default>12346</default>
                                 <size>7</size>
                                 <max>7</max>
                                 <eval>int</eval>
@@ -67,6 +67,7 @@
                             </label>
                             <config>
                                 <type>input</type>
+                                <default>typo3</default>
                                 <size>30</size>
                             </config>
                         </TCEforms>
@@ -78,7 +79,9 @@
                             </label>
                             <config>
                                 <type>input</type>
-                                <size>30</size>
+                                <default>1</default>
+                                <size>7</size>
+                                <eval>int</eval>
                             </config>
                         </TCEforms>
                     </tree_id>
