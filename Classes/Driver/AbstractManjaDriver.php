@@ -58,21 +58,21 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver 
      *
      * @var \Jokumer\FalManja\Service\ManjaConnector
      */
-    protected $manjaConnector;
+    private $manjaConnector = null;
 
     /**
      * API manja server instance
      *
      * @var \ManjaServer
      */
-    protected $manjaServer;
+    private $manjaServer = null;
 
     /**
      * API manja repository instance
      *
      * @var \MjCRepository
      */
-    protected $manjaRepository;
+    private $manjaRepository = null;
 
     /**
      * Cache
@@ -131,6 +131,37 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver 
         }
     }
 
+    private function connectServer() {
+        // Process connection to manja - instantiates manja server class
+        $this->manjaConnector = new ManjaConnector($this->configuration);
+        $this->manjaServer = $this->manjaConnector->processConnection();
+        if ($this->manjaConnector->getConnectionStatus()) {
+            // Instantiate manja repository model class
+            $this->manjaRepository = GeneralUtility::makeInstance(\MjCRepository::class, $this->manjaServer);
+        }
+    }
+
+    protected function getManjaConnector() : ManjaConnector {
+        if( $this->manjaConnector===null ) {
+            $this->connectServer();
+        }
+        return $this->manjaConnector;
+    }
+
+    protected function getManjaServer() : \ManjaServer {
+        if( $this->manjaServer===null ) {
+            $this->connectServer();
+        }
+        return $this->manjaServer;
+    }
+
+    protected function getManjaRepository() : \MjCRepository {
+        if( $this->manjaRepository===null ) {
+            $this->connectServer();
+        }
+        return $this->manjaRepository;
+    }
+
     /**
      * Initializes this object. This is called by the storage after the driver
      * has been attached.
@@ -143,13 +174,7 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver 
         if ($this->cacheManager->hasCache('fal_manja')) {
             $this->cache = $this->cacheManager->getCache('fal_manja');
         }
-        // Process connection to manja - instantiates manja server class
-        $this->manjaConnector = new ManjaConnector($this->configuration);
-        $this->manjaServer = $this->manjaConnector->processConnection();
-        if ($this->manjaConnector->getConnectionStatus()) {
-            // Instantiate manja repository model class
-            $this->manjaRepository = GeneralUtility::makeInstance(\MjCRepository::class, $this->manjaServer);
-        }
+        // dont connect yet - connect on demand only
     }
 
     /**
@@ -199,7 +224,7 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver 
     // }
     // private function getNodeByPathWithCache( \MjCPath $path ) : ?\MjCNode {
     //     if( ($node=$this->getFromNodeCache($path))!==null ) return $node;
-    //     if( ($node=$this->manjaRepository->GetNodeByPath($path))===null ) return null;
+    //     if( ($node=$this->getManjaRepository()->GetNodeByPath($path))===null ) return null;
     //     $this->add2NodeCache($path,$node);
     //     return $node;
     // } 
@@ -224,7 +249,7 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver 
     {
         try {
             $folderPath = new \MjCPath($folderIdentifier);
-            $node = $this->manjaRepository->GetNodeByPath($folderPath);
+            $node = $this->getManjaRepository()->GetNodeByPath($folderPath);
             return [
                 'identifier' => $folderPath->GetFolderPathString(),
                 'name' => $node->GetAttribute('filename'),  //$folderPath->GetBasename(),
@@ -358,14 +383,12 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver 
         $sort = '',
         $sortRev = false
     ) {
-        if( !($this->manjaRepository instanceof \MjCRepository) ) return [];
-
         if( $recursive ) throw new \RuntimeException('Recursive getFilesInFolder() is not implemented yet.' );
 
         $folderPath = new MjCPath($folderIdentifier);
 
         /** @var \MjCFolder $folder */
-        $folder = $this->manjaRepository->GetNodeByPath($folderPath);
+        $folder = $this->getManjaRepository()->GetNodeByPath($folderPath);
 
         // whether result list can be sliced early (or late after sort and filtering in getIdentifiersFromResultList)
         $pre_sliced = false;    //!$filenameFilterCallbacks && !$sort;
@@ -426,14 +449,12 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver 
         $sort = '',
         $sortRev = false
     ) {
-        if( !($this->manjaRepository instanceof \MjCRepository) ) return [];
-
         if( $recursive ) throw new \RuntimeException('Recursive getFoldersInFolder() is not implemented yet.' );
 
         $folderPath = new MjCPath($folderIdentifier);
 
         /** @var \MjCFolder $folder */
-        $folder = $this->manjaRepository->GetNodeByPath($folderPath);
+        $folder = $this->getManjaRepository()->GetNodeByPath($folderPath);
 
         // whether result list can be sliced early (or late after sort and filtering in getIdentifiersFromResultList)
         $pre_sliced = false;    //!$folderNameFilterCallbacks && !$sort;
@@ -635,11 +656,10 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver 
      */
     public function folderExists( $folderIdentifier ) : bool
     {
-        if ( !($this->manjaRepository instanceof \MjCRepository) ) return false;
         if ($folderIdentifier === self::ROOT_FOLDER_IDENTIFIER) return true;
         try {
             $folderPath = new \MjCPath($folderIdentifier);
-            $folder = $this->manjaRepository->GetNodeByPath($folderPath);
+            $folder = $this->getManjaRepository()->GetNodeByPath($folderPath);
             return $folder instanceof \MjCFolder;
         } catch( \MjCObjectNotFoundException $e ) {
             return false;
@@ -775,11 +795,7 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver 
             return $document;
         }
 
-        if ( !($this->manjaRepository instanceof \MjCRepository) ) {
-            return null;
-        }
-
-        $document = $this->manjaRepository->GetNodeByPathString($fileIdentifier);
+        $document = $this->getManjaRepository()->GetNodeByPathString($fileIdentifier);
         if ( !($document instanceof \MjCDocument) ) {
             return null;
         }
@@ -878,6 +894,13 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver 
 		}
 
         $src_stream = $document->GetStream();
+        if( $src_stream===null ) {
+			flock($trg_stream, LOCK_UN);
+			fclose($trg_stream);
+			unlink($temporaryPath);
+			throw new InvalidFileException('File "' . $fileIdentifier . '": Error while streaming media to file (source not available).');
+        }
+
         $copy_res = stream_copy_to_stream($src_stream,$trg_stream);
         if ($copy_res === false) {
 			flock($trg_stream, LOCK_UN);
@@ -885,7 +908,8 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver 
 			unlink($temporaryPath);
 			throw new InvalidFileException('File "' . $fileIdentifier . '": Error while streaming media to file.');
 		}
-		if (!flock($trg_stream,LOCK_UN) || !fclose($trg_stream)) {
+
+        if (!flock($trg_stream,LOCK_UN) || !fclose($trg_stream)) {
 			// Maybe it's a bit much to throw an error on that, but at least it prevents errors down the line (e.g. while trying to read during upload)
 			throw new InvalidFileException('File "' . $fileIdentifier . '": Error while getting media item: Could not unlock or close the target file.');
 		}
@@ -935,13 +959,6 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver 
     }
 
 
-    /**
-     * @return \ManjaServer
-     */
-    protected function getManjaServer(): \ManjaServer
-    {
-        return $this->manjaServer;
-    }
 
     /*********** UNUSED FUNCTIONS *************************************************************************************/
 
