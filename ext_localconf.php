@@ -47,7 +47,7 @@ call_user_func(
             'label' => 'Manja Digital Asset Management'
         ];
         // Cache configuration
-        if (!is_array($GLOBALS['TYPO3_CONF_VARS']['SYS']['caching']['cacheConfigurations'][$extKey])) {
+        if (!isset($GLOBALS['TYPO3_CONF_VARS']['SYS']['caching']['cacheConfigurations'][$extKey])) {
             $GLOBALS['TYPO3_CONF_VARS']['SYS']['caching']['cacheConfigurations'][$extKey] = [
                 'backend' => \TYPO3\CMS\Core\Cache\Backend\TransientMemoryBackend::class,
                 'options' => [

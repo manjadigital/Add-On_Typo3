@@ -18,8 +18,8 @@
     }
   ],
   "support": {
-    "email": "service@enobe.de",
-    "source": "https://manjagit.virtomain.de/manja/Add-On_Typo3"
+    "email": "post@manjadigital.de",
+    "source": "https://git.manjadigital.de/manja/Add-On_Typo3"
   },
   "require": {
     "psr/http-message": "^1.0",
