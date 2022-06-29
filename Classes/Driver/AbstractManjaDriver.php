@@ -790,7 +790,9 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver 
      */
     protected function getDocumentByIdentifier($fileIdentifier)
     {
-        $document = $this->getDocumentCacheByFileIdentifier($fileIdentifier);
+        $cacheIdentifier = $this->getDocumentCacheIdentifier($fileIdentifier);
+
+        $document = $this->getDocumentCacheByCacheIdentifier($cacheIdentifier);
         if ($document instanceof \MjCDocument) {
             return $document;
         }
@@ -801,8 +803,8 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver 
         }
 
         // Add to cache
-        $this->setDocumentCacheByFileIdentifier(
-            $fileIdentifier,
+        $this->setDocumentCacheByCacheIdentifier(
+            $cacheIdentifier,
             $document
         );
 
@@ -812,10 +814,10 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver 
     /**
      * Returns document id by file identifier (path)
      *
-     * @param $fileIdentifier
+     * @param string $fileIdentifier
      * @return int|null $documentId
      */
-    protected function getDocumentIdByIdentifier($fileIdentifier): ?int
+    protected function getDocumentIdByIdentifier( string $fileIdentifier ): ?int
     {
         /** @var \MjCDocument $document */
         $document = $this->getDocumentByIdentifier($fileIdentifier);
@@ -828,21 +830,17 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver 
     /**
      * Cache manja document
      *
-     * @param string $fileIdentifier
+     * @param string $cacheIdentifier
      * @param \MjCDocument $document
      */
-    protected function setDocumentCacheByFileIdentifier(
-        $fileIdentifier,
-        \MjCDocument $document
-    ): void {
-        $cacheIdentifier = $this->getDocumentCacheIdentifier($fileIdentifier);
+    protected function setDocumentCacheByCacheIdentifier( string $cacheIdentifier, \MjCDocument $document ) : void {
         if (!$this->cache->has($cacheIdentifier)) {
             $this->cache->set($cacheIdentifier, $document);
         }
     }
 
     /**
-     * Returns the cache identifier for a given file identifier
+     * Returns a document from cache, by file identifier
      *
      * @param string $fileIdentifier
      * @return mixed
@@ -850,6 +848,17 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver 
     protected function getDocumentCacheByFileIdentifier($fileIdentifier)
     {
         $cacheIdentifier = $this->getDocumentCacheIdentifier($fileIdentifier);
+        return $this->getDocumentCacheByCacheIdentifier($cacheIdentifier);
+    }
+
+    /**
+     * Returns a document from cache, by cache identifier
+     *
+     * @param string $cacheIdentifier
+     * @return mixed
+     */
+    protected function getDocumentCacheByCacheIdentifier( string $cacheIdentifier )
+    {
         return ($result=$this->cache->get($cacheIdentifier))===false ? null : $result;
     }
 

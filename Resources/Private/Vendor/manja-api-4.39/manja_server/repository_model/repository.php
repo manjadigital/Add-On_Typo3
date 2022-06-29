@@ -298,7 +298,7 @@ class MjCRepository {
 	 */
 	public function GetSubFolderNodesByFolderId( int $parent_folder_id ) : array {
 		$subfolders = [];
-		foreach( $this->_load_category_children($parent_folder_id,null) as $sub_folder_id=>$sub_folder_cmeta ) {
+		foreach( $this->_load_category_children($parent_folder_id) as $sub_folder_id=>$sub_folder_cmeta ) {
 			$subfolders[] = isset($this->folders_by_id_cache[$sub_folder_id]) ? $this->folders_by_id_cache[$sub_folder_id] : $this->CreateFolderNode2($sub_folder_id,$sub_folder_cmeta);
 		}
 		return $subfolders;
@@ -368,7 +368,8 @@ class MjCRepository {
 		***/
 		for( $i=0; isset($path_segments[$i]); ++$i ) {
 			$segment = $path_segments[$i];
-			if( ($child_node=$node->GetChildByPathSegment($segment,false))===null ) {
+			$populate_sub_folder_cache = $i===0 && $node_path_str==='/';
+			if( ($child_node=$node->GetChildByPathSegment($segment,$populate_sub_folder_cache))===null ) {
 				throw new MjCObjectNotFoundException( 'object not found(1): path='.$node_path_str.'; segment='.$segment );
 			}
 			if( !$child_node->IsFolder() ) {
@@ -395,14 +396,17 @@ class MjCRepository {
 		// check path cache, navigate down on path segments from leaf to root
 		if( !isset($path->segments[0]) ) return $this->GetRootFolder(); // = the root folder node
 		if( !empty($this->folders_by_path_cache) ) {
-			$str_path = (string)$path;
-			if( isset($this->folders_by_path_cache[$str_path]) ) return $this->folders_by_path_cache[$str_path];	// a node matching "full path" exists in cache...
+			$node_path_str = (string)$path;
+			if( isset($this->folders_by_path_cache[$node_path_str]) ) {
+				// a node matching the path already exists in cache...
+				return $this->folders_by_path_cache[$node_path_str];
+			}
 			// walk path down to root, use any folder node that exists in cache as a starting node for walking up to leaf ...
 			for( $x=count($path->segments)-1; $x>=0; --$x ) {
-				$str_path = $path->GetSubPathString($x);
-				if( isset($this->folders_by_path_cache[$str_path]) ) {
+				$parent_path_str = $path->GetSubPathString($x);
+				if( isset($this->folders_by_path_cache[$parent_path_str]) ) {
 					// found folder node for path of $x'th segment in cache ... -> navigate from cached node up to the actual leaf node ...
-					return $this->_get_descendant_node_by_path_segments($this->folders_by_path_cache[$str_path],$str_path,array_slice($path->segments,$x));
+					return $this->_get_descendant_node_by_path_segments($this->folders_by_path_cache[$parent_path_str],$parent_path_str,array_slice($path->segments,$x));
 				}
 			}
 		}
