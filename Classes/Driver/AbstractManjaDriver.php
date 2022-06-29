@@ -108,6 +108,18 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver 
      */
     protected const ROOT_FOLDER_IDENTIFIER = '/';
 
+
+    /**
+     * @var \MjCDocument[]
+     */
+    private $_folders_documents_lru_cache = [];
+
+    /**
+     * @var \MjCDocument[]
+     */
+    private $_documents_by_path_lru_cache = [];
+
+
     /**
      * Initialize this driver and expose the capabilities for the repository to use
      * Exclude CAPABILITY_WRITABLE which should be set to '0' cause modification of files and folders are not supported
@@ -371,7 +383,6 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver 
         return (string)$folderPath->GetAppended($fileName);
     }
 
-    private $_folders_documents_lru_cache = [];
 
     /**
      * Returns a list of files inside the specified path
@@ -405,15 +416,21 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver 
 
         /** @var \MjCFolder $folder */
         $folder = $this->getManjaRepository()->GetNodeByPath($folderPath);
+        $folderPathStr = $folderPath->GetFolderPathString();
 
         // whether result list can be sliced early (or late after sort and filtering in getIdentifiersFromResultList)
         $pre_sliced = false;    //!$filenameFilterCallbacks && !$sort;
         if( $pre_sliced ) {
             $documents = $folder->GetDocuments( (int)$start, (int)$numberOfItems===0 ? 2147483637 : (int)$numberOfItems );
-        } else if( isset($this->_folders_documents_lru_cache[$folderIdentifier]) ) {
-            $documents = $this->_folders_documents_lru_cache[$folderIdentifier];
+        } else if( isset($this->_folders_documents_lru_cache[$folderPathStr]) ) {
+            $documents = $this->_folders_documents_lru_cache[$folderPathStr];
         } else {
-            $documents = $this->_folders_documents_lru_cache[$folderIdentifier] = $folder->GetDocuments(0,2147483637);
+            $documents = $this->_folders_documents_lru_cache[$folderPathStr] = $folder->GetDocuments(0,2147483637);
+            // add all docs to documents_by_path cache ...
+            foreach( $documents as $document ) {
+                $documentPathStr = $folderPathStr . $document->GetPathSegment();
+                $this->_documents_by_path_lru_cache[$documentPathStr] = $document;
+            }
         }
 
         $sortedResult = $this->getSortedResultList($documents,$sort,$sortRev);
@@ -806,8 +823,13 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver 
      * @param $fileIdentifier
      * @return mixed $document Instance of \MjCDocument or NULL if not found
      */
-    protected function getDocumentByIdentifier($fileIdentifier)
+    protected function getDocumentByIdentifier( string $fileIdentifier ) : ?\MjCDocument
     {
+        $documentPathStr = $fileIdentifier;
+        if( isset($this->_documents_by_path_lru_cache[$documentPathStr]) ) {
+            return $this->_documents_by_path_lru_cache[$documentPathStr];
+        }
+
         $cacheIdentifier = $this->getDocumentCacheIdentifier($fileIdentifier);
 
         $document = $this->getDocumentCacheByCacheIdentifier($cacheIdentifier);
@@ -826,7 +848,7 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver 
             $document
         );
 
-        return $document;
+        return $this->_documents_by_path_lru_cache[$documentPathStr] = $document;
     }
 
     /**
