@@ -27,7 +27,10 @@ defined('TYPO3_MODE') or die();
  *
  ***/
 
-require $_ENV['TYPO3_PATH_ROOT'].'/typo3conf/ext/fal_manja/.Build/vendor/autoload.php';
+$autoloadPath = $_ENV['TYPO3_PATH_ROOT'].'/typo3conf/ext/fal_manja/.Build/vendor/autoload.php';
+if( file_exists($autoloadPath) ) {
+    require $autoloadPath;
+}
 
 
 use TYPO3\CMS\Extbase\SignalSlot\Dispatcher;
