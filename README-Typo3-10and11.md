@@ -52,7 +52,8 @@ docker exec -it fal_manja bash
 
 
 # in container:
-apt update && apt install php-mysqli default-mysql-server
+apt update && apt install php-mysqli default-mysql-server imagemagick
+
 
 cd /opt
 composer create-project typo3/cms-base-distribution typo3 ^10

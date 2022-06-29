@@ -368,9 +368,13 @@ class MjCRepository {
 		***/
 		for( $i=0; isset($path_segments[$i]); ++$i ) {
 			$segment = $path_segments[$i];
-			if( ($child_node=$node->GetChildByPathSegment($segment,false))===null ) throw new MjCObjectNotFoundException( 'object not found(1): path='.$node_path_str.'; segment='.$segment );
+			if( ($child_node=$node->GetChildByPathSegment($segment,false))===null ) {
+				throw new MjCObjectNotFoundException( 'object not found(1): path='.$node_path_str.'; segment='.$segment );
+			}
 			if( !$child_node->IsFolder() ) {
-				if( $i!=count($path_segments)-1 ) throw new MjCObjectNotFoundException( 'object not found(2): path='.$node_path_str.'; segment='.$segment );
+				if( $i!=count($path_segments)-1 ) {
+					throw new MjCObjectNotFoundException( 'object not found(2): path='.$node_path_str.'; segment='.$segment );
+				}
 				return $child_node;
 			}
 			$node_path_str = ($node_path_str==='/') ? ('/'.$segment) : ($node_path_str.'/'.$segment);
