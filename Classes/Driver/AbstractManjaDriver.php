@@ -328,6 +328,13 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver 
      */
     public function countFilesInFolder($folderIdentifier, $recursive = false, array $filenameFilterCallbacks = [])
     {
+        if( $recursive===false && $filenameFilterCallbacks===[] ) {
+            // fast-path
+            $folderPath = new MjCPath($folderIdentifier);
+            /** @var \MjCFolder $folder */
+            $folder = $this->getManjaRepository()->GetNodeByPath($folderPath);
+            return $folder->GetTotalDocumentCount();
+        }
         return count($this->getFilesInFolder($folderIdentifier, 0, 0, $recursive, $filenameFilterCallbacks));
     }
 
@@ -341,6 +348,13 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver 
      */
     public function countFoldersInFolder($folderIdentifier, $recursive = false, array $folderNameFilterCallbacks = [])
     {
+        if( $recursive===false && $folderNameFilterCallbacks===[] ) {
+            // fast-path
+            $folderPath = new MjCPath($folderIdentifier);
+            /** @var \MjCFolder $folder */
+            $folder = $this->getManjaRepository()->GetNodeByPath($folderPath);
+            return $folder->GetTotalFolderCount();
+        }
         return count($this->getFoldersInFolder($folderIdentifier, 0, 0, $recursive, $folderNameFilterCallbacks));
     }
 
@@ -356,6 +370,8 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver 
         $folderPath = new \MjCPath($folderIdentifier);
         return (string)$folderPath->GetAppended($fileName);
     }
+
+    private $_folders_documents_lru_cache = [];
 
     /**
      * Returns a list of files inside the specified path
@@ -392,11 +408,13 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver 
 
         // whether result list can be sliced early (or late after sort and filtering in getIdentifiersFromResultList)
         $pre_sliced = false;    //!$filenameFilterCallbacks && !$sort;
-
-        $documents = $folder->GetDocuments(
-            $pre_sliced ? (int)$start : 0,
-            $pre_sliced ? ( (int)$numberOfItems===0 ? 2147483637 : (int)$numberOfItems ) : 2147483637
-        );
+        if( $pre_sliced ) {
+            $documents = $folder->GetDocuments( (int)$start, (int)$numberOfItems===0 ? 2147483637 : (int)$numberOfItems );
+        } else if( isset($this->_folders_documents_lru_cache[$folderIdentifier]) ) {
+            $documents = $this->_folders_documents_lru_cache[$folderIdentifier];
+        } else {
+            $documents = $this->_folders_documents_lru_cache[$folderIdentifier] = $folder->GetDocuments(0,2147483637);
+        }
 
         $sortedResult = $this->getSortedResultList($documents,$sort,$sortRev);
         return $this->getIdentifiersFromResultList(
