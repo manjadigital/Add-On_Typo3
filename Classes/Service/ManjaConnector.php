@@ -97,7 +97,7 @@ class ManjaConnector implements SingletonInterface
      *
      * @var int
      */
-    protected $connectionTreeId = 0;
+    protected $connectionTreeId = 1;
 
     /**
      * The server connection timeout in seconds.

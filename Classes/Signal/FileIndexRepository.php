@@ -118,7 +118,7 @@ final class FileIndexRepository extends AbstractFileIndexRepository
      * @param string $fileIdentifier
      * @param array  $t3MetaData
      */
-    public function getManjaMetaData(
+    private function getManjaMetaData(
         string $fileIdentifier,
         array &$t3MetaData
     ): void {

@@ -48,12 +48,14 @@ class MjCDocument extends MjCNode {
 		$server = $this->repository->GetServer();
 		$result = $server->MediumGet($this->document_id,false,null,['intent'=>'download']);
 		if( $result!==false ) return $server->get_payload($result,true);
+		return null; // <- just for breakpoint
 	}
 
 	public function GetStream() {
 		$server = $this->repository->GetServer();
 		$result = $server->MediumGet($this->document_id,false,null,['exit'=>1,'intent'=>'download']);
 		if( $result!==false ) return $server->get_stream($result,true);
+		return null; // <- just for breakpoint
 	}
 
 	public function SendRenditionToClient( string $par ) {
