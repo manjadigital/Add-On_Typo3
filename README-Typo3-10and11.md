@@ -131,3 +131,52 @@ TYPO3_CONTEXT=Development php -S 0.0.0.0:8000 -t public
 
 ```
 
+## Debugging PHP in VSCode 
+
+### 1. Attach to running container ...
+
+Select the `fal_manja` or `fal_manja11` container.
+
+### 2. Open folder ...
+
+`/opt/typo3/`
+
+### 3. Install Extension `xdebug.php-debug`
+
+### 4. Add File `.vscode/launch.json`:
+
+```json
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "PHP: XDebug",
+			"type": "php",
+			"request": "launch",
+			"cwd": "${workspaceFolder}/public",
+			"log": true,
+			"port": 9002,
+			"xdebugSettings": {
+				"max_children": 500,
+				"max_data": 4096,
+				"show_hidden": 1
+			},
+			"pathMappings": {
+				"/opt/fal_manja/" : "${workspaceFolder}/public/typo3conf/ext/fal_manja/"
+			}
+		},
+	]
+}
+```
+
+### 5. Run Debug Configuration `PHP: XDebug`
+
+### 6. Running Typo3 changes to
+
+```sh
+export XDEBUG_SESSION=XDEBUG_ECLIPSE
+
+# as before:
+TYPO3_CONTEXT=Development php -S 0.0.0.0:8000 -t public
+```
+
