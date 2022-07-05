@@ -22,10 +22,7 @@
     "source": "https://git.manjadigital.de/manja/Add-On_Typo3"
   },
   "require": {
-    "psr/http-message": "^1.0",
-    "typo3/cms-backend": "^10.4",
-    "typo3/cms-core": "^10.4",
-    "typo3/cms-extbase": "^10.4"
+    "psr/http-message": "^1.0"
   },
   "replace": {
     "typo3-ter/ext-key": "self.version"
@@ -51,7 +48,7 @@
   },
   "extra": {
     "typo3/cms": {
-      "cms-package-dir": "{$vendor-dir}/typo3/cms",
+      "cms-package-dir": "../../../vendor/typo3/cms",
       "web-dir": ".Build/Web",
       "extension-key": "fal_manja"
     }

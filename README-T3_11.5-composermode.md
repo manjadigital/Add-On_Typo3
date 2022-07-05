@@ -1,4 +1,4 @@
-# variante für version 11.5 im non-composermode
+# variante für version 11.5 im composermode
 
 FAL_MANJA=$PWD
 docker kill fal_manja
@@ -28,15 +28,28 @@ apt install php-pgsql
 sudo -u postgres psql -c "CREATE ROLE typo3 WITH LOGIN INHERIT CONNECTION LIMIT -1 PASSWORD 'typo3';" 
 sudo -u postgres psql -c "CREATE DATABASE typo3 WITH OWNER = typo3 ENCODING = 'UTF8' CONNECTION LIMIT = -1;"
 
-cd opt
-curl -L -o typo3_src.tgz https://get.typo3.org/11.5.12
-gunzip typo3_src.tgz
-tar -xf typo3_src.tar
-cd typo3_src-11.5.12
-touch FIRST_INSTALL
+cd /opt
+composer create-project typo3/cms-base-distribution:^11 typo3
+cd typo3
 
-TYPO3_CONTEXT=Development php -S 0.0.0.0:8000 -t .
+composer exec typo3cms install:setup -- \
+    --no-interaction \
+    --database-driver=pdo_pgsql \
+    --database-user-name=typo3 \
+    --database-user-password=typo3 \
+    --database-host-name=127.0.0.1 \
+    --database-port=5432 \
+    --database-name=typo3 \
+    --use-existing-database \
+    --admin-user-name=admin \
+    --admin-password=password \
+    --site-setup-type=site
 
-ln -s /opt/fal_manja typo3conf/ext/fal_manja
+mkdir public/typo3conf/ext
+ln -s /opt/fal_manja public/typo3conf/ext/fal_manja
 
-TYPO3_CONTEXT=Development php -S 0.0.0.0:8000 -t .
+composer install
+composer exec typo3 extension:setup
+
+TYPO3_CONTEXT=Development php -S 0.0.0.0:8000 -t public
+

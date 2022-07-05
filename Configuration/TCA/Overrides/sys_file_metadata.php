@@ -136,6 +136,8 @@ call_user_func(static function () {
         'after:alternative'
     );
 
+    if(!isset($GLOBALS['TCA']['sys_file_metadata']['interface'])) $GLOBALS['TCA']['sys_file_metadata']['interface'] = [];
+    if(!isset($GLOBALS['TCA']['sys_file_metadata']['interface']['showRecordFieldList'])) $GLOBALS['TCA']['sys_file_metadata']['interface']['showRecordFieldList'] = '';
     $GLOBALS['TCA']['sys_file_metadata']['interface']['showRecordFieldList'] .= 'subject, coverage, creator, publisher, contributor, copyright, keywords, created, changed';
 
     /**
@@ -144,8 +146,8 @@ call_user_func(static function () {
      * other storages which are not based on manja driver
      */
 
-    /*We need a valid BE_USER object for quering storage repository */
-    if ($GLOBALS['BE_USER'] === null) {
+    /*We need a valid BE_USER object for quering storage repository */    
+    if (!isset($GLOBALS['BE_USER']) || $GLOBALS['BE_USER'] === null) {
         $GLOBALS['BE_USER'] = GeneralUtility::makeInstance(BackendUserAuthentication::class);
         $GLOBALS['BE_USER']->start();
     }
