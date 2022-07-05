@@ -108,6 +108,20 @@ abstract class AbstractFileIndexRepository
      * initializeManjaDriver
      */
     protected function initializeManjaDriver() : void {
+        if( $this->storage && ($storageRecord=$this->storage->getStorageRecord()) && ($storageRecord['uid']??false) ) {
+
+            // grab & use the driver instance from storage
+            // - but Typo3 ResourceStorage interface does not give us access to the driver (how stupid encapsulation is that!?),
+            // - so, grab from our own instance list & match by storageUID (to avoid collisions - eg. when multiple manja storages are in use)
+            if( ($storageDriver=ManjaDriver::getInstanceByStorageUID($storageRecord['uid']))!==null ) {
+                $this->manjaDriver = $storageDriver;
+                return;
+            }
+            
+        }
+
+        // WARN: this will create a second instance of ManjaDriver (with all things separate: connection, repository, caches, etc.)
+        // -> very unscalable, very slow -> results in many unnecessary re-connects and so on
         $objectManager = GeneralUtility::makeInstance(ObjectManager::class);
         $this->manjaDriver = $objectManager->get(ManjaDriver::class, $this->configuration);
         if ($this->manjaDriver !== null) {

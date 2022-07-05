@@ -39,6 +39,7 @@ use TYPO3\CMS\Core\Resource\Driver\AbstractHierarchicalFilesystemDriver;
 use TYPO3\CMS\Core\Resource\Exception\ExistingTargetFileNameException;
 use TYPO3\CMS\Core\Resource\Exception\FileOperationErrorException;
 use TYPO3\CMS\Core\Resource\Exception\FolderDoesNotExistException;
+use TYPO3\CMS\Core\Resource\Exception\InvalidConfigurationException;
 use TYPO3\CMS\Core\Resource\Exception\InvalidFileException;
 use TYPO3\CMS\Core\Resource\Exception\InvalidFileNameException;
 use TYPO3\CMS\Core\Resource\ResourceStorage;
@@ -121,6 +122,13 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver 
 
 
     /**
+     * Fully initialized driver instances, accessible by storage uid
+     * @var AbstractManjaDriver[] 
+     */
+    private static $_instances_by_storage_uid = [];
+
+
+    /**
      * Initialize this driver and expose the capabilities for the repository to use
      * Exclude CAPABILITY_WRITABLE which should be set to '0' cause modification of files and folders are not supported
      *
@@ -145,19 +153,36 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver 
 
     private function connectServer() {
         // Process connection to manja - instantiates manja server class
-        $this->manjaConnector = new ManjaConnector($this->configuration);
-        $this->manjaServer = $this->manjaConnector->processConnection();
-        if ($this->manjaConnector->getConnectionStatus()) {
-            // Instantiate manja repository model class
-            $this->manjaRepository = GeneralUtility::makeInstance(\MjCRepository::class, $this->manjaServer);
+        if( $this->manjaConnector===null ) {
+            $this->manjaConnector = new ManjaConnector($this->configuration);
+        }
+        if( $this->manjaServer===null ) {
+            $this->manjaServer = $this->manjaConnector->processConnection();
+        }
+        if( $this->manjaRepository===null && $this->manjaConnector->getConnectionStatus() ) {
+
+            $root_tree_id = (int)( $this->configuration['tree_id'] ?? 1 );
+            $root_folder_id = (int)( $this->configuration['root_folder_id'] ?? 1 );
+            if( $root_tree_id!==1 && $root_folder_id===1 ) {
+                // the default will not work on trees with tree_id > 1,
+                // -> must query actual root folder id:
+                $root_folder_id = $this->getRootCategoryId($root_tree_id);
+            }
+
+            $this->manjaRepository = GeneralUtility::makeInstance(
+                \MjCRepository::class,
+                $this->manjaServer,
+                $root_tree_id,
+                $root_folder_id,
+            );
         }
     }
 
-    protected function getManjaConnector() : ManjaConnector {
-        if( $this->manjaConnector===null ) {
-            $this->connectServer();
-        }
-        return $this->manjaConnector;
+    private function getRootCategoryId( int $tree_id ) : int {
+        $tree_list = $this->manjaServer->TreeList();
+        if( !isset($tree_list[$tree_id]) ) throw new InvalidConfigurationException('invalid tree_id='.$tree_id);
+        $cfg = $tree_list[$tree_id];
+        return (int)$cfg['root_id'];
     }
 
     protected function getManjaServer() : \ManjaServer {
@@ -187,7 +212,18 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver 
             $this->cache = $this->cacheManager->getCache('fal_manja');
         }
         // dont connect yet - connect on demand only
+
+
+        if( $this->storageUid!==null ) {
+            self::$_instances_by_storage_uid[$this->storageUid] = $this;
+        }
     }
+
+
+    public static function getInstanceByStorageUID( int $storageUid ) : ?AbstractManjaDriver {
+        return self::$_instances_by_storage_uid[$storageUid] ?? null;
+    }
+
 
     /**
      * Merges the capabilities merged by the user at the storage
@@ -946,8 +982,15 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver 
         if( $src_stream===null ) {
 			flock($trg_stream, LOCK_UN);
 			fclose($trg_stream);
-			unlink($temporaryPath);
-			throw new InvalidFileException('File "' . $fileIdentifier . '": Error while streaming media to file (source not available).');
+            if( true ) {
+                // because throwing an exception here may result in failing to show whole directory listings - WTF!? ..
+                // -> just succeed with an empty file for typo3 :(
+                return $temporaryPath;
+            } else {
+                // fail with exception (this may result in failing to show whole directory listings - WTF!?)
+                unlink($temporaryPath);
+                throw new InvalidFileException('File "' . $fileIdentifier . '": Error while streaming media to file (source not available).');
+            }
         }
 
         $copy_res = stream_copy_to_stream($src_stream,$trg_stream);
