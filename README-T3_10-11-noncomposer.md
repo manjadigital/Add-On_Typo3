@@ -10,8 +10,8 @@ docker exec -it fal_manja bash
 ```sh
 apt update && apt install imagemagick 
 
-sudo apt install postgresql postgresql-contrib
-pg_ctlcluster 11 main start
+sudo apt install postgresql postgresql-contrib php-xml
+pg_ctlcluster 13 main start
 apt install php-pgsql
 
 sudo -u postgres psql -c "CREATE ROLE typo3 WITH LOGIN INHERIT CONNECTION LIMIT -1 PASSWORD 'typo3';" 
