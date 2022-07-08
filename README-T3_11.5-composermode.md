@@ -11,6 +11,7 @@ docker exec -it fal_manja_c bash
 apt update && apt install imagemagick 
 
 sudo apt install postgresql postgresql-contrib php-xml
+sudo apt-get install jq moreutils
 pg_ctlcluster 13 main start
 apt install php-pgsql
 
@@ -21,14 +22,7 @@ cd /opt
 composer create-project typo3/cms-base-distribution:^11 typo3
 cd typo3
 
-# add in composer.json
-    ,
-    "repositories": [
-		{
-			"type": "path",
-			"url": "./packages/*/"
-		}
-	]
+jq '.repositories[0] = {"type": "path", "url": "./packages/*/"}' composer.json | sponge composer.json
 
 mkdir packages
 ln -s /opt/fal_manja packages/fal_manja
@@ -48,7 +42,8 @@ composer exec typo3cms install:setup -- \
 
 composer require jokumer/fal-manja:@dev
 
-# add 'trustedHostsPattern' => '.*' to 'SYS' in public/typo3conf/LocalConfiguration.php
+sed -i  "/'SYS'/a\'trustedHostsPattern\'\ \=\>\ '.*'," public/typo3conf/LocalConfiguration.php
+
 
 TYPO3_CONTEXT=Development php -S 0.0.0.0:8000 -t public
 ```
