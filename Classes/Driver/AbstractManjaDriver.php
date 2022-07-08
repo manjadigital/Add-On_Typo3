@@ -978,8 +978,8 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver 
 			throw new InvalidFileException('File "' . $fileIdentifier . '": Error while getting media item: Could not lock target file.');
 		}
 
-        $src_stream = $document->GetStream();
-        if( $src_stream===null ) {
+        $src_data = $document->GetContent();
+        if( $src_data===false || $src_data===null ) {
 			flock($trg_stream, LOCK_UN);
 			fclose($trg_stream);
             if( true ) {
@@ -989,17 +989,41 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver 
             } else {
                 // fail with exception (this may result in failing to show whole directory listings - WTF!?)
                 unlink($temporaryPath);
-                throw new InvalidFileException('File "' . $fileIdentifier . '": Error while streaming media to file (source not available).');
+                throw new InvalidFileException('File "' . $fileIdentifier . '": Error while retrieving media data from file (source not available).');
             }
         }
-
-        $copy_res = stream_copy_to_stream($src_stream,$trg_stream);
-        if ($copy_res === false) {
+    
+        $trg_written = fwrite($trg_stream,$src_data);
+        if( $trg_written===false || $trg_written!==strlen($src_data) ) {
 			flock($trg_stream, LOCK_UN);
 			fclose($trg_stream);
 			unlink($temporaryPath);
-			throw new InvalidFileException('File "' . $fileIdentifier . '": Error while streaming media to file.');
-		}
+			throw new InvalidFileException('File "' . $fileIdentifier . '": Error while writing media data to temporary file.');
+        }
+
+
+        // $src_stream = $document->GetStream();
+        // if( $src_stream===null ) {
+		// 	flock($trg_stream, LOCK_UN);
+		// 	fclose($trg_stream);
+        //     if( true ) {
+        //         // because throwing an exception here may result in failing to show whole directory listings - WTF!? ..
+        //         // -> just succeed with an empty file for typo3 :(
+        //         return $temporaryPath;
+        //     } else {
+        //         // fail with exception (this may result in failing to show whole directory listings - WTF!?)
+        //         unlink($temporaryPath);
+        //         throw new InvalidFileException('File "' . $fileIdentifier . '": Error while streaming media to file (source not available).');
+        //     }
+        // }
+
+        // $copy_res = stream_copy_to_stream($src_stream,$trg_stream);
+        // if ($copy_res === false) {
+		// 	flock($trg_stream, LOCK_UN);
+		// 	fclose($trg_stream);
+		// 	unlink($temporaryPath);
+		// 	throw new InvalidFileException('File "' . $fileIdentifier . '": Error while streaming media to file.');
+		// }
 
         if (!flock($trg_stream,LOCK_UN) || !fclose($trg_stream)) {
 			// Maybe it's a bit much to throw an error on that, but at least it prevents errors down the line (e.g. while trying to read during upload)
