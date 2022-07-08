@@ -1,9 +1,9 @@
 # variante für version 11.5 im composermode
 ```sh
 FAL_MANJA=$PWD
-docker kill fal_manja
-docker run --rm -it  -d -p 55080:8000 -v $FAL_MANJA:/opt/fal_manja --name fal_manja git.manjadigital.de:4567/manja/manja_container/base-webrtenv:debian-11
-docker exec -it fal_manja bash
+docker kill fal_manja_c
+docker run --rm -it  -d -p 60002:8000 -v $FAL_MANJA:/opt/fal_manja --name fal_manja_c git.manjadigital.de:4567/manja/manja_container/base-webrtenv:debian-11
+docker exec -it fal_manja_c bash
 ```
 
 # in container:
@@ -21,6 +21,18 @@ cd /opt
 composer create-project typo3/cms-base-distribution:^11 typo3
 cd typo3
 
+# add in composer.json
+    ,
+    "repositories": [
+		{
+			"type": "path",
+			"url": "./packages/*/"
+		}
+	]
+
+mkdir packages
+ln -s /opt/fal_manja packages/fal_manja
+
 composer exec typo3cms install:setup -- \
     --no-interaction \
     --database-driver=pdo_pgsql \
@@ -34,11 +46,9 @@ composer exec typo3cms install:setup -- \
     --admin-password=password \
     --site-setup-type=site
 
-mkdir public/typo3conf/ext
-ln -s /opt/fal_manja public/typo3conf/ext/fal_manja
+composer require jokumer/fal-manja:@dev
 
-composer install
-composer exec typo3 extension:setup
+# add 'trustedHostsPattern' => '.*' to 'SYS' in public/typo3conf/LocalConfiguration.php
 
 TYPO3_CONTEXT=Development php -S 0.0.0.0:8000 -t public
 ```

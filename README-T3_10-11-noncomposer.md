@@ -2,7 +2,7 @@
 ```sh
 FAL_MANJA=$PWD
 docker kill fal_manja
-docker run --rm -it  -d -p 55080:8000 -v $FAL_MANJA:/opt/fal_manja --name fal_manja git.manjadigital.de:4567/manja/manja_container/base-webrtenv:debian-11
+docker run --rm -it  -d -p 60001:8000 -v $FAL_MANJA:/opt/fal_manja --name fal_manja git.manjadigital.de:4567/manja/manja_container/base-webrtenv:debian-11
 docker exec -it fal_manja bash
 ```
 

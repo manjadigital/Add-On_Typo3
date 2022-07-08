@@ -28,7 +28,7 @@ defined('TYPO3_MODE') or die();
  ***/
 
 if(!isset($_ENV['TYPO3_PATH_ROOT'])) {
-    $autoloadPath = getcwd()."/typo3conf/ext/fal_manja/.Build/vendor/autoload.php";
+    $autoloadPath = getcwd()."/../typo3conf/ext/fal_manja/.Build/vendor/autoload.php";
     require $autoloadPath;
 } else {
     $autoloadPath = $_ENV['TYPO3_PATH_ROOT'].'/typo3conf/ext/fal_manja/.Build/vendor/autoload.php';
