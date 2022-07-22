@@ -31,7 +31,7 @@ if (!defined('TYPO3')) {
 }
 
 if(!isset($_ENV['TYPO3_PATH_ROOT'])) {
-    $autoloadPath = getcwd()."/../typo3conf/ext/typo3_storage_connector/.Build/vendor/autoload.php";
+    $autoloadPath = $_SERVER['TYPO3_PATH_WEB']."/typo3conf/ext/typo3_storage_connector/.Build/vendor/autoload.php";
     require $autoloadPath;
 } 
 

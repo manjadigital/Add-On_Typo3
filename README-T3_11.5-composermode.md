@@ -23,6 +23,7 @@ composer create-project typo3/cms-base-distribution:^11 typo3
 cd typo3
 
 jq '.repositories[0] = {"type": "path", "url": "./packages/*/"}' composer.json | sponge composer.json
+jq '.scripts["typo3-cms-scripts"][1] = "typo3cms database:updateschema"' composer.json | sponge composer.json
 
 mkdir packages
 #ln -s /opt/fal_manja packages/fal_manja
@@ -50,7 +51,4 @@ composer require manja/typo3-storage-connector
 
 TYPO3_CONTEXT=Development php -S 0.0.0.0:8000 -t public
 ```
-
-After Login: Maintenance -> Analyze Database -> Apply Changes
-
 To avoid Filelist errors: use '0:/typo3temp/assets/_processed_manja'

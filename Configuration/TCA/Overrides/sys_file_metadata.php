@@ -117,12 +117,6 @@ $GLOBALS['TCA']['sys_file_metadata']['interface']['showRecordFieldList'] .= 'sub
  * other storages which are not based on manja driver
  */
 
-/*We need a valid BE_USER object for quering storage repository */    
-if (!isset($GLOBALS['BE_USER']) || $GLOBALS['BE_USER'] === null) {
-    $GLOBALS['BE_USER'] = GeneralUtility::makeInstance(BackendUserAuthentication::class);
-    $GLOBALS['BE_USER']->start();
-}
-
 /** @var StorageRepository $storageRepository */
 $storageRepository = GeneralUtility::makeInstance(StorageRepository::class);
 $allStorages = $storageRepository->findAll();
