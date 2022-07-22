@@ -53,4 +53,4 @@ TYPO3_CONTEXT=Development php -S 0.0.0.0:8000 -t public
 
 After Login: Maintenance -> Analyze Database -> Apply Changes
 
-To avoid Filelist errors: dont fill processed path
+To avoid Filelist errors: use '0:/typo3temp/assets/_processed_manja'

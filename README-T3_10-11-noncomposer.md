@@ -1,6 +1,7 @@
 # variante für version 11.5 im non-composermode
 ```sh
 FAL_MANJA=$PWD
+composer install
 docker kill fal_manja
 docker run --rm -it  -d -p 60001:8000 -v $FAL_MANJA:/opt/typo3_storage_connector --name fal_manja git.manjadigital.de:4567/manja/manja_container/base-webrtenv:debian-11
 docker exec -it fal_manja bash
