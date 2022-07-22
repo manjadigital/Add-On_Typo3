@@ -2,7 +2,7 @@
 ```sh
 FAL_MANJA=$PWD
 docker kill fal_manja_c
-docker run --rm -it  -d -p 60002:8000 -v $FAL_MANJA:/opt/fal_manja --name fal_manja_c git.manjadigital.de:4567/manja/manja_container/base-webrtenv:debian-11
+docker run --rm -it  -d -p 60002:8000 -v $FAL_MANJA:/opt/typo3_storage_connector --name fal_manja_c git.manjadigital.de:4567/manja/manja_container/base-webrtenv:debian-11
 docker exec -it fal_manja_c bash
 ```
 
@@ -25,7 +25,8 @@ cd typo3
 jq '.repositories[0] = {"type": "path", "url": "./packages/*/"}' composer.json | sponge composer.json
 
 mkdir packages
-ln -s /opt/fal_manja packages/fal_manja
+#ln -s /opt/fal_manja packages/fal_manja
+ln -s /opt/typo3_storage_connector packages/typo3_storage_connector
 
 composer exec typo3cms install:setup -- \
     --no-interaction \
@@ -40,10 +41,16 @@ composer exec typo3cms install:setup -- \
     --admin-password=password \
     --site-setup-type=site
 
-composer require jokumer/fal-manja:@dev
-
 sed -i  "/'SYS'/a\'trustedHostsPattern\'\ \=\>\ '.*'," public/typo3conf/LocalConfiguration.php
+
+
+#composer require jokumer/fal-manja:@dev
+composer require manja/typo3-storage-connector
 
 
 TYPO3_CONTEXT=Development php -S 0.0.0.0:8000 -t public
 ```
+
+After Login: Maintenance -> Analyze Database -> Apply Changes
+
+To avoid Filelist errors: dont fill processed path

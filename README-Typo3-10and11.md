@@ -48,7 +48,7 @@ TODO: steps to build package ..
 FAL_MANJA=$PWD
 #FAL_MANJA=$PWD/public/typo3conf/ext/fal_manja
 
-docker run --rm -it  -d -p 8000:8000 -v $FAL_MANJA:/opt/fal_manja --name fal_manja git.manjadigital.de:4567/manja/manja_container/base-webrtenv:debian-11
+docker run --rm -it  -d -p 8000:8000 -v $FAL_MANJA:/opt/typo3_storage_connector --name fal_manja git.manjadigital.de:4567/manja/manja_container/base-webrtenv:debian-11
 docker exec -it fal_manja bash
 
 
@@ -79,7 +79,7 @@ composer exec typo3cms install:setup -- \
     --site-setup-type=site
 
 
-ln -s /opt/fal_manja public/typo3conf/ext/fal_manja
+ln -s /opt/typo3_storage_connector public/typo3conf/ext/typo3_storage_connector
 
 TYPO3_CONTEXT=Development php -S 0.0.0.0:8000 -t public
 
@@ -93,7 +93,7 @@ TYPO3_CONTEXT=Development php -S 0.0.0.0:8000 -t public
 FAL_MANJA=$PWD
 #FAL_MANJA=$PWD/public/typo3conf/ext/fal_manja
 
-docker run --rm -it  -d -p 8000:8000 -v $FAL_MANJA:/opt/fal_manja --name fal_manja11 git.manjadigital.de:4567/manja/manja_container/base-webrtenv:debian-11
+docker run --rm -it  -d -p 8000:8000 -v $FAL_MANJA:/opt/typo3_storage_connector --name fal_manja11 git.manjadigital.de:4567/manja/manja_container/base-webrtenv:debian-11
 docker exec -it fal_manja11 bash
 
 
@@ -125,7 +125,7 @@ composer exec typo3cms install:setup -- \
 
 
 mkdir -p public/typo3conf/ext || :
-ln -s /opt/fal_manja public/typo3conf/ext/fal_manja
+ln -s /opt/typo3_storage_connector public/typo3conf/ext/typo3_storage_connector
 
 TYPO3_CONTEXT=Development php -S 0.0.0.0:8000 -t public
 
@@ -162,7 +162,7 @@ Select the `fal_manja` or `fal_manja11` container.
 				"show_hidden": 1
 			},
 			"pathMappings": {
-				"/opt/fal_manja/" : "${workspaceFolder}/public/typo3conf/ext/fal_manja/"
+				"/opt/typo3_storage_connector/" : "${workspaceFolder}/public/typo3conf/ext/typo3_storage_connector/"
 			}
 		},
 	]

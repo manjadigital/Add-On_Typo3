@@ -26,28 +26,26 @@ defined('TYPO3_MODE') or die();
  * @author Falk Röder <mail@falk-roeder.de>
  *
  ***/
-
-if(!isset($_ENV['TYPO3_PATH_ROOT'])) {
-    $autoloadPath = getcwd()."/../typo3conf/ext/fal_manja/.Build/vendor/autoload.php";
-    require $autoloadPath;
-} else {
-    $autoloadPath = $_ENV['TYPO3_PATH_ROOT'].'/typo3conf/ext/fal_manja/.Build/vendor/autoload.php';
-    require $autoloadPath;
+if (!defined('TYPO3')) {
+    die ('Access denied.');
 }
 
-
+if(!isset($_ENV['TYPO3_PATH_ROOT'])) {
+    $autoloadPath = getcwd()."/../typo3conf/ext/typo3_storage_connector/.Build/vendor/autoload.php";
+    require $autoloadPath;
+} 
 
 use TYPO3\CMS\Extbase\SignalSlot\Dispatcher;
 
 call_user_func(
     function () {
-        $extKey = 'fal_manja';
+        $extKey = 'typo3_storage_connector';
 
         // Register driver
         $GLOBALS['TYPO3_CONF_VARS']['SYS']['fal']['registeredDrivers'][$extKey] = [
             'class' => \Jokumer\FalManja\Driver\ManjaDriver::class,
             'shortName' => \Jokumer\FalManja\Driver\FalManja::DRIVER_SHORT_NAME,
-            'flexFormDS' => 'FILE:EXT:fal_manja/Configuration/FlexForms/ManjaDriver.xml',
+            'flexFormDS' => 'FILE:EXT:typo3_storage_connector/Configuration/FlexForms/ManjaDriver.xml',
             'label' => 'Manja Digital Asset Management'
         ];
         // Cache configuration
@@ -61,7 +59,7 @@ call_user_func(
         }
 
         \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addPageTSConfig(
-            '<INCLUDE_TYPOSCRIPT: source="FILE:EXT:fal_manja/Configuration/TSconfig/Static/BackendForms.ts">'
+            '<INCLUDE_TYPOSCRIPT: source="FILE:EXT:typo3_storage_connector/Configuration/TSconfig/Static/BackendForms.ts">'
         );
 
         /* @var \TYPO3\CMS\Extbase\SignalSlot\Dispatcher $signalSlotDispatcher */

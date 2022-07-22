@@ -1,11 +1,22 @@
 {
-  "name": "jokumer/fal-manja",
+  "name": "manja/typo3-storage-connector",
   "type": "typo3-cms-extension",
   "description": "Provides a Manja driver for TYPO3 File Abstraction Layer.",
-  "license": "GPL-3.0+",
-  "keywords": ["typo3", "TYPO3 CMS", "fal", "manja", "digital asset management"],
+  "license": "GPL-2.0-or-later",
+  "keywords": ["typo3", "TYPO3 CMS", "manja", "digital asset management"],
   "homepage": "https://www.manjadigital.de",
+  "version": "2.0.0@stable",
   "authors": [
+    {
+      "name": "Robert Frunzke",
+      "email": "rfrunzke@manjadigital.de",
+      "role": "Developer"
+    },
+    {
+      "name": "Martin Hoff",
+      "email": "m.hoff@manjadigital.de",
+      "role": "Developer"
+    },
     {
       "name": "Falk Roeder",
       "email": "mail@falk-roeder.de",
@@ -22,6 +33,9 @@
     "source": "https://git.manjadigital.de/manja/Add-On_Typo3"
   },
   "require": {
+    "php" : "^7.4",
+    "typo3/cms-backend": "^11.5",
+    "typo3/cms-core": "^11.5",
     "psr/http-message": "^1.0"
   },
   "replace": {
@@ -50,7 +64,7 @@
     "typo3/cms": {
       "cms-package-dir": "../../../vendor/typo3/cms",
       "web-dir": ".Build/Web",
-      "extension-key": "fal_manja"
+      "extension-key": "typo3_storage_connector"
     }
   }
 }

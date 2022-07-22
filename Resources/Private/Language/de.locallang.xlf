@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <xliff version="1.0">
-	<file source-language="en" target-language="de" datatype="plaintext" original="messages" date="2018-05-08T24:00:00Z" product-name="fal_manja">
+	<file source-language="en" target-language="de" datatype="plaintext" original="messages" date="2018-05-08T24:00:00Z" product-name="typo3_storage_connector">
 		<header/>
 		<body>
 			<trans-unit id="error">
