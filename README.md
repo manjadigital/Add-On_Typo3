@@ -6,28 +6,20 @@ Includes Manja API 4.0
 
 ## Requirements
 
-* TYPO3 CMS 8LTS or 9LTS
-* PHP >= 7.2
+* TYPO3 CMS 11.5
+* PHP >= 7.4
 
 ## License
 
-This TYPO3 extension is licensed under GPL version 3 or any later version.
+This TYPO3 extension is licensed under GPL version 2 or any later version.
 
 ## Installation
 
-### Install via ExtensionManager
-
-Extract ZIP file as `fal_manja` to your local extension folder `typo3conf/ext` and install via ExtensionManager.  
-Or upload via ExtensionManager, which installs automaticly.
-
-![InstallViaExtensionManager](Resources/Public/Documentation/01_InstallViaExtensionManager.png)  
-_Install via ExtensionManager_
-
 ### Install via Composer
 
-If extension will be available at [packagist](https://packagist.org/packages/jokumer/fal-manja) you can require it via composer
+If extension will be available at [packagist](https://packagist.org/packages/manja/typo3-storage-connector) you can require it via composer
 
-`composer require jokumer/fal-manja`
+`composer require manja/typo3-storage-connector`
 
 ### Add file storage
 
@@ -51,7 +43,7 @@ Normally folder `fileadmin` is auto created and the default storage.
 Checkbox for `Automaticly extract metadata after upload` is enabled by default.
 
 Enter `Folder for manipulated and temporary images etc.` for temporary folder of processed files. The entered value needs to be in the form `{storageId}:/{path/tho/folder}`
-where {storageId} must be the ID of a writable storage. If you leave it empty, or set it to a wrong value, a warning is shown and a default value of `0:/typo3temp/assets/_processed_` will be used.
+where {storageId} must be the ID of a writable storage. If you leave it empty, or set it to a wrong value, a warning is shown and a default value of `0:/typo3temp/assets/_processed_manja` will be used.
 Any file from Manja server which is used in any modified versions (croped, resized, etc.) will be stored automaticly by TYPO3 in this folder.
 
 ![AddFileStorageSettings](Resources/Public/Documentation/04_AddFileStorageSettings.png)  
@@ -121,6 +113,8 @@ IT-Service Robert Frunzke [www.manjadigital.de](https://www.manjadigital.de)
 
 ### Developers
 
+Robert Frunzke mail@manjadigital.de
+Martin Hoff m.hoff@manjadigital.de
 Falk Röder mail@falk-roeder.de  
 Jörg Kummer service@enobe.de
 
