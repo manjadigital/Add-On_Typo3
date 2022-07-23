@@ -324,7 +324,7 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver 
         try {
             $file = $this->getDocumentByIdentifier($fileIdentifier);
             if ($file instanceof \MjCDocument) {
-                return [
+                $infos = [
                     'name' => $file->GetAttribute('filename'),
                     'identifier' => $fileIdentifier,
                     'identifier_hash' => $this->hashIdentifier($fileIdentifier),
@@ -335,8 +335,19 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver 
                     'mimetype' => $file->GetAttribute('content_type'),
                     'size' => (int)$file->GetAttribute('content_length'),
                     'storage' => $this->storageUid,
-                    'typo3_storage_connector_document_id' => $file->GetAttribute('document_id')
+                    'typo3_storage_connector_document_id' => $file->GetAttribute('document_id'),
+                    'extension' => explode('/', $file->GetAttribute('content_type'))
                 ];
+                $infos['extension'] = $infos['extension'][1];
+                if(count($propertiesToExtract) == 0) {
+                    return $infos;
+                } else {
+                    $retValue = [];
+                    foreach($propertiesToExtract as $prop) {
+                        $retValue[$prop] = $infos[$prop];
+                    }
+                    return $retValue;
+                }
             }
         } catch( \MjCObjectNotFoundException $e ) {
             throw new \InvalidArgumentException( 'File "' . $fileIdentifier . '" does not exist.', 1314516809, $e );
