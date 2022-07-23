@@ -512,13 +512,13 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver 
     }
 
 
-    private function getRecursiveFolders(\MjCFolder $parent, array &$result) : array {        
-        $subfolders = $parent->GetFolders();        
-        $result = array_merge($subfolders, $result);
+    private function getRecursiveFolders(\MjCFolder $parent, array &$result, bool $start = true) : array {        
+        $subfolders = $parent->GetFolders();                
         foreach($subfolders as $folder ) {
-            $this->getRecursiveFolders($folder, $result);
+            $result[] = $folder;
+            $this->getRecursiveFolders($folder, $result, false);
         }
-        return $result;
+        return $start?$result:[];
     }
     /**
      * Returns a list of folders inside the specified path
