@@ -120,6 +120,11 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver 
      */
     private $_documents_by_path_lru_cache = [];
 
+    /**
+     * @var \MjcFolder[]
+     */
+    private $_folders_recursive_cache = [];
+
 
     /**
      * Fully initialized driver instances, accessible by storage uid
@@ -457,32 +462,34 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver 
         $sort = '',
         $sortRev = false
     ) {
-        if( $recursive ) throw new \RuntimeException('Recursive getFilesInFolder() is not implemented yet.' );
-
-        $folderPath = new MjCPath($folderIdentifier);
-
-        /** @var \MjCFolder $folder */
-        $folder = $this->getManjaRepository()->GetNodeByPath($folderPath);
-        $folderPathStr = $folderPath->GetFolderPathString();
-
-        // whether result list can be sliced early (or late after sort and filtering in getIdentifiersFromResultList)
-        $pre_sliced = false;    //!$filenameFilterCallbacks && !$sort;
-        if( $pre_sliced ) {
-            $documents = $folder->GetDocuments( (int)$start, (int)$numberOfItems===0 ? 2147483637 : (int)$numberOfItems );
-        } else if( isset($this->_folders_documents_lru_cache[$folderPathStr]) ) {
-            $documents = $this->_folders_documents_lru_cache[$folderPathStr];
-        } else {
-            $documents = $this->_folders_documents_lru_cache[$folderPathStr] = $folder->GetDocuments(0,2147483637);
-            // add all docs to documents_by_path cache ...
-            foreach( $documents as $document ) {
-                $documentPathStr = $folderPathStr . $document->GetPathSegment();
-                $this->_documents_by_path_lru_cache[$documentPathStr] = $document;
-            }
+        $folders = [$folderIdentifier];
+        if( $recursive ) {
+            $folders = $this->getFoldersInFolder($folderIdentifier, $start, $numberOfItems, $recursive, $filenameFilterCallbacks, $sort, $sortRev);
+            array_unshift($folders, $folderIdentifier);
         }
+        $all_documents = [];
+        foreach($folders as $identifier) {
+            $folderPath = new MjCPath($identifier);
 
-        $sortedResult = $this->getSortedResultList($documents,$sort,$sortRev);
+            /** @var \MjCFolder $folder */
+            $folder = $this->getManjaRepository()->GetNodeByPath($folderPath);
+            $folderPathStr = $folderPath->GetFolderPathString();
+
+            if( isset($this->_folders_documents_lru_cache[$folderPathStr]) ) {
+                $documents = $this->_folders_documents_lru_cache[$folderPathStr];
+            } else {
+                $documents = $this->_folders_documents_lru_cache[$folderPathStr] = $folder->GetDocuments(0,2147483637);
+                // add all docs to documents_by_path cache ...
+                foreach( $documents as $document ) {
+                    $documentPathStr = $folderPathStr . $document->GetPathSegment();
+                    $this->_documents_by_path_lru_cache[$documentPathStr] = $document;
+                }
+            }    
+            $all_documents = array_merge($all_documents, $documents);
+        }
+        $sortedResult = $this->getSortedResultList($all_documents,$sort,$sortRev);
         return $this->getIdentifiersFromResultList(
-            $folderPath,
+            $recursive?null:$folderPath,
             $sortedResult,
             $filenameFilterCallbacks,
             $pre_sliced?false:$start,
@@ -505,6 +512,14 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver 
     }
 
 
+    private function getRecursiveFolders(\MjCFolder $parent, array &$result) : array {        
+        $subfolders = $parent->GetFolders();        
+        $result = array_merge($subfolders, $result);
+        foreach($subfolders as $folder ) {
+            $this->getRecursiveFolders($folder, $result);
+        }
+        return $result;
+    }
     /**
      * Returns a list of folders inside the specified path
      *
@@ -530,9 +545,7 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver 
         array $folderNameFilterCallbacks = [],
         $sort = '',
         $sortRev = false
-    ) {
-        if( $recursive ) throw new \RuntimeException('Recursive getFoldersInFolder() is not implemented yet.' );
-
+    ) {        
         $folderPath = new MjCPath($folderIdentifier);
 
         /** @var \MjCFolder $folder */
@@ -540,15 +553,20 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver 
 
         // whether result list can be sliced early (or late after sort and filtering in getIdentifiersFromResultList)
         $pre_sliced = false;    //!$folderNameFilterCallbacks && !$sort;
-
-        $subFolders = $folder->GetFolders(
-            $pre_sliced ? (int)$start : 0,
-            $pre_sliced ? ( (int)$numberOfItems===0 ? 2147483637 : (int)$numberOfItems ) : 2147483637
-        );
+        
+        $subFolders = [];
+        if($recursive) {
+            $subFolders = $this->getRecursiveFolders($folder, $subFolders);
+        } else {
+            $subFolders = $folder->GetFolders(
+                $pre_sliced ? (int)$start : 0,
+                $pre_sliced ? ( (int)$numberOfItems===0 ? 2147483637 : (int)$numberOfItems ) : 2147483637
+            );
+        }
 
         $sortedResult = $this->getSortedResultList($subFolders,$sort,$sortRev);
         return $this->getIdentifiersFromResultList(
-            $folderPath,
+            $recursive?null:$folderPath,
             $sortedResult,
             $folderNameFilterCallbacks,
             $pre_sliced?false:$start,
