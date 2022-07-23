@@ -30,11 +30,6 @@ if (!defined('TYPO3')) {
     die ('Access denied.');
 }
 
-if(!isset($_ENV['TYPO3_PATH_ROOT'])) {
-    $autoloadPath = $_SERVER['TYPO3_PATH_WEB']."/typo3conf/ext/typo3_storage_connector/.Build/vendor/autoload.php";
-    require $autoloadPath;
-} 
-
 use TYPO3\CMS\Extbase\SignalSlot\Dispatcher;
 
 call_user_func(
