@@ -30,8 +30,6 @@ if (!defined('TYPO3')) {
     die ('Access denied.');
 }
 
-use TYPO3\CMS\Extbase\SignalSlot\Dispatcher;
-
 call_user_func(
     function () {
         $extKey = 'typo3_storage_connector';
@@ -57,26 +55,7 @@ call_user_func(
             '<INCLUDE_TYPOSCRIPT: source="FILE:EXT:typo3_storage_connector/Configuration/TSconfig/Static/BackendForms.ts">'
         );
 
-        /* @var \TYPO3\CMS\Extbase\SignalSlot\Dispatcher $signalSlotDispatcher */
-        $signalSlotDispatcher = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(Dispatcher::class);
-
-        $signalSlotDispatcher->connect(
-            \TYPO3\CMS\Core\Resource\Index\FileIndexRepository::class,
-            'recordUpdated',
-            \Jokumer\FalManja\Signal\FileIndexRepository::class,
-            'recordUpdatedOrCreated'
-        );
-        $signalSlotDispatcher->connect(
-            \TYPO3\CMS\Core\Resource\Index\FileIndexRepository::class,
-            'recordCreated',
-            \Jokumer\FalManja\Signal\FileIndexRepository::class,
-            'recordUpdatedOrCreated'
-        );
-        $signalSlotDispatcher->connect(
-            \TYPO3\CMS\Core\Resource\ResourceFactory::class,
-            'preProcessStorage',
-            \Jokumer\FalManja\Signal\ResourceFactory::class,
-            'preProcessStorage'
-        );
+        $extractorRegistry = \TYPO3\CMS\Core\Resource\Index\ExtractorRegistry::getInstance();
+        $extractorRegistry->registerExtractionService(\Jokumer\FalManja\Ressource\ManjaExtractor::class);
     }
 );
