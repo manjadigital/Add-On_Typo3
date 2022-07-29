@@ -32,13 +32,13 @@ if (!defined('TYPO3')) {
 
 call_user_func(
     function () {
-        $extKey = 'typo3_storage_connector';
+        $extKey = 'fal_manja';
 
         // Register driver
         $GLOBALS['TYPO3_CONF_VARS']['SYS']['fal']['registeredDrivers'][$extKey] = [
             'class' => \Jokumer\FalManja\Driver\ManjaDriver::class,
             'shortName' => \Jokumer\FalManja\Driver\FalManja::DRIVER_SHORT_NAME,
-            'flexFormDS' => 'FILE:EXT:typo3_storage_connector/Configuration/FlexForms/ManjaDriver.xml',
+            'flexFormDS' => 'FILE:EXT:fal_manja/Configuration/FlexForms/ManjaDriver.xml',
             'label' => 'Manja Digital Asset Management'
         ];
         // Cache configuration
@@ -52,7 +52,7 @@ call_user_func(
         }
 
         \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addPageTSConfig(
-            '<INCLUDE_TYPOSCRIPT: source="FILE:EXT:typo3_storage_connector/Configuration/TSconfig/Static/BackendForms.ts">'
+            '<INCLUDE_TYPOSCRIPT: source="FILE:EXT:fal_manja/Configuration/TSconfig/Static/BackendForms.ts">'
         );
 
         $extractorRegistry = \TYPO3\CMS\Core\Resource\Index\ExtractorRegistry::getInstance();

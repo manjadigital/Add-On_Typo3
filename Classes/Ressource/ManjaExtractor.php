@@ -11,39 +11,12 @@ use TYPO3\CMS\Core\Resource\Index\ExtractorInterface;
 use TYPO3\CMS\Core\Type\File\ImageInfo;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-class ManjaExtractor implements ExtractorInterface {
-
-    /**
-     * @var \Jokumer\FalManja\Driver\ManjaDriver
-     */
-    protected $manjaDriver;
-    
-    /**
-     * @var array
-     */
-    protected $configuration;
+class ManjaExtractor implements ExtractorInterface {    
 
     /**
      * @var array
      */
     protected $datTimeFields = [109, 113];
-
-    /**
-     * @var string
-     */
-    protected $mappingKey = 'meta_mapping';
-
-    public function __construct() {
-        $this->manjaDriver = null;
-        $this->configuration = null;    
-    }
-
-    /**
-     * initializeManjaDriver
-     */
-    protected function initializeManjaDriver() : void {
-        
-    }
 
     public function getFileTypeRestrictions(): array {
         return [];
@@ -51,7 +24,7 @@ class ManjaExtractor implements ExtractorInterface {
 
     public function getDriverRestrictions(): array {
         return [
-            'fal_manja', 'typo3_storage_connector'
+            'fal_manja'
         ];
     }
 
@@ -69,43 +42,27 @@ class ManjaExtractor implements ExtractorInterface {
 
 
     public function extractMetaData(File $file, array $previousExtractedData = []): array {
-        if( $this->configuration === null) $this->configuration = $file->getStorage()->getConfiguration();
-        if( $this->manjaDriver === null) {
-            $storage = $file->getStorage();            
-            if( $storage && ($storageRecord=$storage->getStorageRecord()) && ($storageRecord['uid']??false) ) {
-
-                // grab & use the driver instance from storage
-                // - but Typo3 ResourceStorage interface does not give us access to the driver (how stupid encapsulation is that!?),
-                // - so, grab from our own instance list & match by storageUID (to avoid collisions - eg. when multiple manja storages are in use)
-                if( ($storageDriver=ManjaDriver::getInstanceByStorageUID($storageRecord['uid']))!==null ) {
-                    $this->manjaDriver = $storageDriver;                                        
-                }
-                
-            }
-            if($this->manjaDriver === null) {
-                // WARN: this will create a second instance of ManjaDriver (with all things separate: connection, repository, caches, etc.)
-                // -> very unscalable, very slow -> results in many unnecessary re-connects and so on
-                $objectManager = GeneralUtility::makeInstance(ObjectManager::class);
-                $this->manjaDriver = $objectManager->get(ManjaDriver::class, $this->configuration);
-                if ($this->manjaDriver !== null) {
-                    $this->manjaDriver->initialize();
-                }
-            }            
-        }
-
-        $previousExtractedData['is_manja'] = 1;        
-        if (!isset($this->configuration[$this->mappingKey]) || count($this->configuration[$this->mappingKey]) === 0) { 
+        $storage = $file->getStorage();
+        $storageRecord=$storage->getStorageRecord();
+        $storage_uid = $storageRecord['uid']??false;
+        $configuration = $storage->getConfiguration();
+        if (!isset($configuration["meta_mapping"]) || count($configuration["meta_mapping"]) === 0 || $storage_uid === false) { 
             return $previousExtractedData;
         }
+        $meta_mapping = $configuration["meta_mapping"];
+        $manjaDriver = ManjaDriver::getInstanceByStorageUID($storage_uid);
+
+        $previousExtractedData['is_manja'] = 1;        
+        
 
         $metaIds = [];
-        foreach ($this->configuration[$this->mappingKey] as $metaId) {
+        foreach ($meta_mapping as $metaId) {
             $metaIds[] = $metaId;
         }
 
-        $metaData = $this->manjaDriver->getDocumentMetaData($file->GetIdentifier(),$metaIds);  
+        $metaData = $manjaDriver->getDocumentMetaData($file->GetIdentifier(),$metaIds);  
         
-        foreach ($this->configuration[$this->mappingKey] as $metaDataField => $meta_id) {
+        foreach ($meta_mapping as $metaDataField => $meta_id) {
             if (!isset($metaData[$meta_id][0])) {
                 continue;
             }

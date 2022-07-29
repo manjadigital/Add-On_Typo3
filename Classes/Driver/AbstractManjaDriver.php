@@ -213,8 +213,8 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver 
         // Get cache
         $this->objectManager = GeneralUtility::makeInstance(ObjectManager::class);
         $this->cacheManager = $this->objectManager->get(CacheManager::class);
-        if ($this->cacheManager->hasCache('typo3_storage_connector')) {
-            $this->cache = $this->cacheManager->getCache('typo3_storage_connector');
+        if ($this->cacheManager->hasCache('fal_manja')) {
+            $this->cache = $this->cacheManager->getCache('fal_manja');
         }
         // dont connect yet - connect on demand only
 
@@ -340,7 +340,7 @@ abstract class AbstractManjaDriver extends AbstractHierarchicalFilesystemDriver 
                     'mimetype' => $file->GetAttribute('content_type'),
                     'size' => (int)$file->GetAttribute('content_length'),
                     'storage' => $this->storageUid,
-                    'typo3_storage_connector_document_id' => $file->GetAttribute('document_id'),
+                    'fal_manja_document_id' => $file->GetAttribute('document_id'),
                     'extension' => explode('/', $file->GetAttribute('content_type'))
                 ];
                 $infos['extension'] = $infos['extension'][1];

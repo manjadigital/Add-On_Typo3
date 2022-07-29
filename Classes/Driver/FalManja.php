@@ -45,12 +45,12 @@ final class FalManja
     /**
      * @const string
      */
-    public const DRIVER_TYPE = 'typo3_storage_connector';
+    public const DRIVER_TYPE = 'fal_manja';
 
     /**
      * @const string
      */
-    public const DRIVER_SHORT_NAME = 'typo3_storage_connector';
+    public const DRIVER_SHORT_NAME = 'fal_manja';
 
     /**
      * @const string

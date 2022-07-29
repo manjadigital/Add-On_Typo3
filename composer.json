@@ -64,7 +64,7 @@
     "typo3/cms": {
       "cms-package-dir": "../../../vendor/typo3/cms",
       "web-dir": ".Build/Web",
-      "extension-key": "typo3_storage_connector"
+      "extension-key": "fal_manja"
     }
   }
 }

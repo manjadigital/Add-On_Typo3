@@ -11,14 +11,14 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 $tempColumns = [
     'is_manja'    => [
         'exclude' => 1,
-        'label'   => 'LLL:EXT:typo3_storage_connector/Resources/Private/Language/locallang_be.xlf:sys_file_metadata.is_manja',
+        'label'   => 'LLL:EXT:fal_manja/Resources/Private/Language/locallang_be.xlf:sys_file_metadata.is_manja',
         'config'  => [
             'type' => 'passthrough',
         ],
     ],
     'subject'     => [
         'exclude' => 0,
-        'label'   => 'LLL:EXT:typo3_storage_connector/Resources/Private/Language/locallang_be.xlf:sys_file_metadata.subject',
+        'label'   => 'LLL:EXT:fal_manja/Resources/Private/Language/locallang_be.xlf:sys_file_metadata.subject',
         'config'  => [
             'type' => 'input',
             'size' => 30,
@@ -27,7 +27,7 @@ $tempColumns = [
     ],
     'coverage'    => [
         'exclude' => 0,
-        'label'   => 'LLL:EXT:typo3_storage_connector/Resources/Private/Language/locallang_be.xlf:sys_file_metadata.coverage',
+        'label'   => 'LLL:EXT:fal_manja/Resources/Private/Language/locallang_be.xlf:sys_file_metadata.coverage',
         'config'  => [
             'type' => 'input',
             'size' => 30,
@@ -36,7 +36,7 @@ $tempColumns = [
     ],
     'keywords'    => [
         'exclude' => 0,
-        'label'   => 'LLL:EXT:typo3_storage_connector/Resources/Private/Language/locallang_be.xlf:sys_file_metadata.keywords',
+        'label'   => 'LLL:EXT:fal_manja/Resources/Private/Language/locallang_be.xlf:sys_file_metadata.keywords',
         'config'  => [
             'type' => 'input',
             'size' => 30,
@@ -45,7 +45,7 @@ $tempColumns = [
     ],
     'contributor' => [
         'exclude' => 0,
-        'label'   => 'LLL:EXT:typo3_storage_connector/Resources/Private/Language/locallang_be.xlf:sys_file_metadata.contributor',
+        'label'   => 'LLL:EXT:fal_manja/Resources/Private/Language/locallang_be.xlf:sys_file_metadata.contributor',
         'config'  => [
             'type' => 'input',
             'size' => 30,
@@ -54,7 +54,7 @@ $tempColumns = [
     ],
     'publisher' => [
         'exclude' => 0,
-        'label'   => 'LLL:EXT:typo3_storage_connector/Resources/Private/Language/locallang_be.xlf:sys_file_metadata.publisher',
+        'label'   => 'LLL:EXT:fal_manja/Resources/Private/Language/locallang_be.xlf:sys_file_metadata.publisher',
         'config'  => [
             'type' => 'input',
             'size' => 30,
@@ -63,7 +63,7 @@ $tempColumns = [
     ],
     'copyright' => [
         'exclude' => 0,
-        'label'   => 'LLL:EXT:typo3_storage_connector/Resources/Private/Language/locallang_be.xlf:sys_file_metadata.copyright',
+        'label'   => 'LLL:EXT:fal_manja/Resources/Private/Language/locallang_be.xlf:sys_file_metadata.copyright',
         'config'  => [
             'type' => 'input',
             'size' => 30,
@@ -72,7 +72,7 @@ $tempColumns = [
     ],
     'creator' => [
         'exclude' => 0,
-        'label'   => 'LLL:EXT:typo3_storage_connector/Resources/Private/Language/locallang_be.xlf:sys_file_metadata.creator',
+        'label'   => 'LLL:EXT:fal_manja/Resources/Private/Language/locallang_be.xlf:sys_file_metadata.creator',
         'config'  => [
             'type' => 'input',
             'size' => 30,
@@ -81,7 +81,7 @@ $tempColumns = [
     ],
     'created'     => [
         'exclude' => 0,
-        'label'   => 'LLL:EXT:typo3_storage_connector/Resources/Private/Language/locallang_be.xlf:sys_file_metadata.created',
+        'label'   => 'LLL:EXT:fal_manja/Resources/Private/Language/locallang_be.xlf:sys_file_metadata.created',
         'config'  => [
             'type'       => 'input',
             'renderType' => 'inputDateTime',
@@ -90,7 +90,7 @@ $tempColumns = [
     ],
     'changed'     => [
         'exclude' => 0,
-        'label'   => 'LLL:EXT:typo3_storage_connector/Resources/Private/Language/locallang_be.xlf:sys_file_metadata.changed',
+        'label'   => 'LLL:EXT:fal_manja/Resources/Private/Language/locallang_be.xlf:sys_file_metadata.changed',
         'config'  => [
             'type'       => 'input',
             'renderType' => 'inputDateTime',

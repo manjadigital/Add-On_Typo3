@@ -194,14 +194,14 @@ class ManjaConnector implements SingletonInterface
                     // Check creation or edit requests of sys_file_storage with empty values to avoid error messages, returns notice
                     if (isset($_REQUEST['edit']['sys_file_storage'])) {
                         if ($this->connectionHost && !$this->connectionUsername && !$this->connectionPW) {
-                            $message = LocalizationUtility::translate('error.sys_file_storage.login.empty', 'typo3_storage_connector');
+                            $message = LocalizationUtility::translate('error.sys_file_storage.login.empty', 'fal_manja');
                             $this->addFlashMessage($message, FlashMessage::NOTICE);
                         } elseif ($this->connectionHost) {
-                            $message = LocalizationUtility::translate('error.sys_file_storage.login.fail.1525816286', 'typo3_storage_connector');
+                            $message = LocalizationUtility::translate('error.sys_file_storage.login.fail.1525816286', 'fal_manja');
                             $this->addFlashMessage($message, FlashMessage::ERROR);
                         }
                     } else {
-                        $message = LocalizationUtility::translate('error.sys_file_storage.login.fail.1525816287', 'typo3_storage_connector');
+                        $message = LocalizationUtility::translate('error.sys_file_storage.login.fail.1525816287', 'fal_manja');
                         $this->addFlashMessage($message, FlashMessage::ERROR);
                     }
                 } else {
@@ -212,7 +212,7 @@ class ManjaConnector implements SingletonInterface
                 $tmp = $this->manjaServer->SessionCreate();
                 if($tmp !== false) $this->setSessionCookie($tmp['session_id'],(int)$tmp['timeout']);
                 else {
-                    //$message = LocalizationUtility::translate('error.sys_file_storage.session_create.fail.1525816287', 'typo3_storage_connector');
+                    //$message = LocalizationUtility::translate('error.sys_file_storage.session_create.fail.1525816287', 'fal_manja');
                     //$this->addFlashMessage($message, FlashMessage::ERROR);
                     throw new InvalidConfigurationException(sprintf('session create failed: %s', $this->manjaServer->GetErrorString()));
                 }
@@ -220,7 +220,7 @@ class ManjaConnector implements SingletonInterface
         } else {
             // Login for each query - if no sessions. Check creation or edit requests of sys_file_storage with empty values to avoid error messages
             if (!isset($_REQUEST['edit']['sys_file_storage']) && $this->manjaServer->Login($this->connectionUsername, $this->connectionPW) === 0) {
-                $message = LocalizationUtility::translate('error.sys_file_storage.login.fail.1525816288', 'typo3_storage_connector');
+                $message = LocalizationUtility::translate('error.sys_file_storage.login.fail.1525816288', 'fal_manja');
                 $this->addFlashMessage($message, FlashMessage::ERROR);
             } else {
                 $this->manjaConnection = true;
@@ -304,10 +304,10 @@ class ManjaConnector implements SingletonInterface
     public function mj_error_callback($die_on_error, $error_code, $error_string)
     {
         if (isset($_REQUEST['edit']['sys_file_storage']) && (!$this->connectionHost)) {
-            $errorMessage = LocalizationUtility::translate('error.sys_file_storage.host.empty', 'typo3_storage_connector');
+            $errorMessage = LocalizationUtility::translate('error.sys_file_storage.host.empty', 'fal_manja');
             $this->addFlashMessage($errorMessage, FlashMessage::NOTICE);
         } else {
-            $errorMessage = LocalizationUtility::translate('error', 'typo3_storage_connector') . ': ' . $error_code . ': ' . htmlspecialchars($error_string);
+            $errorMessage = LocalizationUtility::translate('error', 'fal_manja') . ': ' . $error_code . ': ' . htmlspecialchars($error_string);
             $this->addFlashMessage($errorMessage, FlashMessage::ERROR);
         }
         // Set Manja connection status

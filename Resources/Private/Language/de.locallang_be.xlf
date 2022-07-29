@@ -1,45 +1,45 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <xliff version="1.0">
-	<file source-language="en" target-language="de" datatype="plaintext" original="messages" date="2018-05-08T24:00:00Z" product-name="typo3_storage_connector">
+	<file source-language="en" target-language="de" datatype="plaintext" original="messages" date="2018-05-08T24:00:00Z" product-name="fal_manja">
 		<header/>
 		<body>
-			<trans-unit id="typo3_storage_connector_driver.connection.host">
+			<trans-unit id="fal_manja_driver.connection.host">
 				<source>Host</source>
 				<target>Host</target>
 			</trans-unit>
-			<trans-unit id="typo3_storage_connector_driver.connection.port">
+			<trans-unit id="fal_manja_driver.connection.port">
 				<source>Port</source>
 				<target>Port</target>
 			</trans-unit>
-			<trans-unit id="typo3_storage_connector_driver.connection.username">
+			<trans-unit id="fal_manja_driver.connection.username">
 				<source>Username</source>
 				<target>Benutzername</target>
 			</trans-unit>
-			<trans-unit id="typo3_storage_connector_driver.connection.password">
+			<trans-unit id="fal_manja_driver.connection.password">
 				<source>Password</source>
 				<target>Passwort</target>
 			</trans-unit>
-			<trans-unit id="typo3_storage_connector_driver.connection.client_id">
+			<trans-unit id="fal_manja_driver.connection.client_id">
 				<source>Client id</source>
 				<target>Benutzer ID</target>
 			</trans-unit>
-			<trans-unit id="typo3_storage_connector_driver.connection.tree_id">
+			<trans-unit id="fal_manja_driver.connection.tree_id">
 				<source>Tree id</source>
 				<target>Baum ID</target>
 			</trans-unit>
-			<trans-unit id="typo3_storage_connector_driver.connection.timeout">
+			<trans-unit id="fal_manja_driver.connection.timeout">
 				<source>Timeout</source>
 				<target>Unterbrechungszeit</target>
 			</trans-unit>
-			<trans-unit id="typo3_storage_connector_driver.connection.stream_timeout">
+			<trans-unit id="fal_manja_driver.connection.stream_timeout">
 				<source>Stream timeout</source>
 				<target>Stream Unterbrechungszeit</target>
 			</trans-unit>
-			<trans-unit id="typo3_storage_connector_driver.connection.use_ssl">
+			<trans-unit id="fal_manja_driver.connection.use_ssl">
 				<source>Use SSL</source>
 				<target>SSL verwenden</target>
 			</trans-unit>
-			<trans-unit id="typo3_storage_connector_driver.connection.use_session">
+			<trans-unit id="fal_manja_driver.connection.use_session">
 				<source>Use session</source>
 				<target>Session verwenden</target>
 			</trans-unit>
