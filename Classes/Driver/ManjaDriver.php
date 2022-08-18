@@ -67,7 +67,7 @@ class ManjaDriver extends AbstractHierarchicalFilesystemDriver //implements Stre
     /**
      * @const string
      */
-    public const PROCESSING_FOLDER_DEFAULT = '/typo3temp/assets/_processed_manja';
+    public const PROCESSING_FOLDER_DEFAULT = '0:/typo3temp/assets/_processed_manja';
 
     /**
      * Own manja connector instance

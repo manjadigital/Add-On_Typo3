@@ -46,7 +46,7 @@ echo '{
 				"show_hidden": 1
 			},
 			"pathMappings": {
-				"/opt/typo3_storage_connector/" : "${workspaceFolder}/public/typo3conf/ext/typo3_storage_connector/"
+				"/opt/typo3_storage_connector/" : "${workspaceFolder}/public/typo3conf/ext/fal_manja/"
 			}
 		},
 	]

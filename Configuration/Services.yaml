@@ -16,8 +16,3 @@ services:
     - name: event.listener
       event: TYPO3\CMS\Core\Resource\Event\BeforeResourceStorageInitializationEvent
   
-  Jokumer\FalManja\EventListener\AfterResourceStorageInitializationEventListener:
-    tags:
-    - name: event.listener
-      event: TYPO3\CMS\Core\Resource\Event\AfterResourceStorageInitializationEvent
-
