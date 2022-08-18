@@ -31,6 +31,10 @@
 				<source>Error Session Create #1525816287</source>
 				<target>Session Create Fehler #1525816287</target>
 			</trans-unit>
+			<trans-unit id="error.sys_file_storage.connection.fail.1525816287">
+				<source>Error Connection #1525816287</source>
+				<target>Connection Fehler #1525816287</target>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>

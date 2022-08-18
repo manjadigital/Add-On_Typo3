@@ -4,13 +4,13 @@
 #
 CREATE TABLE sys_file_metadata (
     is_manja smallint(5) unsigned DEFAULT '0' NOT NULL,
-    subject  varchar(255) DEFAULT '',
+    subject  text DEFAULT '',
     coverage text,
     keywords  text,
-    contributor  varchar(255) DEFAULT '',
-    publisher  varchar(255) DEFAULT '',
-    copyright  varchar(255) DEFAULT '',
-    creator  varchar(255) DEFAULT '',
+    contributor  text DEFAULT '',
+    publisher  text DEFAULT '',
+    copyright  text DEFAULT '',
+    creator  text DEFAULT '',
     created int(11) DEFAULT '0' NOT NULL,
     changed int(11) DEFAULT '0' NOT NULL
 );

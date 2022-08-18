@@ -24,7 +24,7 @@ class ManjaExtractor implements ExtractorInterface {
 
     public function getDriverRestrictions(): array {
         return [
-            'fal_manja'
+            ManjaDriver::DRIVER_TYPE
         ];
     }
 

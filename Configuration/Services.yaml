@@ -1,0 +1,23 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: false
+
+  Jokumer\FalManja\:
+    resource: '../Classes/*'
+
+  Jokumer\FalManja\Service\ManjaService:
+    autowire: false
+    public: true
+
+  Jokumer\FalManja\EventListener\BeforeResourceStorageInitializationEventListener:
+    tags:
+    - name: event.listener
+      event: TYPO3\CMS\Core\Resource\Event\BeforeResourceStorageInitializationEvent
+  
+  Jokumer\FalManja\EventListener\AfterResourceStorageInitializationEventListener:
+    tags:
+    - name: event.listener
+      event: TYPO3\CMS\Core\Resource\Event\AfterResourceStorageInitializationEvent
+

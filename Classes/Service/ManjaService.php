@@ -37,11 +37,11 @@ use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
 use TYPO3\CMS\Core\Resource\Exception\InvalidConfigurationException;
 
 /**
- * Class ManjaConnector
+ * Class ManjaService
  *
  * @since 1.0.0
  */
-class ManjaConnector implements SingletonInterface
+class ManjaService implements SingletonInterface
 {
     /**
      * The manja connection as status
@@ -165,7 +165,8 @@ class ManjaConnector implements SingletonInterface
         $this->manjaServer->SetDieOnError(false);
         // Connect
         if (!$this->manjaServer->Connect()) {
-            throw new InvalidConfigurationException(sprintf('connection failed: %s:%s (%d, %s:%d)', $this->manjaServer->GetErrorString(), $this->manjaServer->GetErrorCode(), $this->connectionClientId, $this->connectionHost, $this->connectionPort));
+            $message = LocalizationUtility::translate('error.sys_file_storage.connection.fail.1525816287', 'fal_manja');
+            $this->addFlashMessage($message, FlashMessage::ERROR);  
         }
         // Enable SSL mode if required
         if ($this->connectionUseSSL) {
@@ -212,9 +213,8 @@ class ManjaConnector implements SingletonInterface
                 $tmp = $this->manjaServer->SessionCreate();
                 if($tmp !== false) $this->setSessionCookie($tmp['session_id'],(int)$tmp['timeout']);
                 else {
-                    //$message = LocalizationUtility::translate('error.sys_file_storage.session_create.fail.1525816287', 'fal_manja');
-                    //$this->addFlashMessage($message, FlashMessage::ERROR);
-                    throw new InvalidConfigurationException(sprintf('session create failed: %s', $this->manjaServer->GetErrorString()));
+                    $message = LocalizationUtility::translate('error.sys_file_storage.session_create.fail.1525816287', 'fal_manja');
+                    $this->addFlashMessage($message, FlashMessage::ERROR);                    
                 }
             }
         } else {

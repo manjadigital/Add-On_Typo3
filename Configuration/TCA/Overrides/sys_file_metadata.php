@@ -2,23 +2,26 @@
 
 defined('TYPO3_MODE') or die();
 
-use Jokumer\FalManja\Driver\FalManja;
+use Jokumer\FalManja\Driver\ManjaDriver;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Resource\StorageRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+
+$extkey = ManjaDriver::DRIVER_TYPE;
+$lang_key = "LLL:EXT:$extkey/Resources/Private/Language/locallang_be.xlf:sys_file_metadata.";
 
 //## extend TCA for file metadata
 $tempColumns = [
     'is_manja'    => [
         'exclude' => 1,
-        'label'   => 'LLL:EXT:fal_manja/Resources/Private/Language/locallang_be.xlf:sys_file_metadata.is_manja',
+        'label'   => $lang_key.'is_manja',
         'config'  => [
             'type' => 'passthrough',
         ],
     ],
     'subject'     => [
         'exclude' => 0,
-        'label'   => 'LLL:EXT:fal_manja/Resources/Private/Language/locallang_be.xlf:sys_file_metadata.subject',
+        'label'   => $lang_key.'subject',
         'config'  => [
             'type' => 'input',
             'size' => 30,
@@ -27,7 +30,7 @@ $tempColumns = [
     ],
     'coverage'    => [
         'exclude' => 0,
-        'label'   => 'LLL:EXT:fal_manja/Resources/Private/Language/locallang_be.xlf:sys_file_metadata.coverage',
+        'label'   => $lang_key.'coverage',
         'config'  => [
             'type' => 'input',
             'size' => 30,
@@ -36,7 +39,7 @@ $tempColumns = [
     ],
     'keywords'    => [
         'exclude' => 0,
-        'label'   => 'LLL:EXT:fal_manja/Resources/Private/Language/locallang_be.xlf:sys_file_metadata.keywords',
+        'label'   => $lang_key.'keywords',
         'config'  => [
             'type' => 'input',
             'size' => 30,
@@ -45,7 +48,7 @@ $tempColumns = [
     ],
     'contributor' => [
         'exclude' => 0,
-        'label'   => 'LLL:EXT:fal_manja/Resources/Private/Language/locallang_be.xlf:sys_file_metadata.contributor',
+        'label'   => $lang_key.'contributor',
         'config'  => [
             'type' => 'input',
             'size' => 30,
@@ -54,7 +57,7 @@ $tempColumns = [
     ],
     'publisher' => [
         'exclude' => 0,
-        'label'   => 'LLL:EXT:fal_manja/Resources/Private/Language/locallang_be.xlf:sys_file_metadata.publisher',
+        'label'   => $lang_key.'publisher',
         'config'  => [
             'type' => 'input',
             'size' => 30,
@@ -63,7 +66,7 @@ $tempColumns = [
     ],
     'copyright' => [
         'exclude' => 0,
-        'label'   => 'LLL:EXT:fal_manja/Resources/Private/Language/locallang_be.xlf:sys_file_metadata.copyright',
+        'label'   => $lang_key.'copyright',
         'config'  => [
             'type' => 'input',
             'size' => 30,
@@ -72,7 +75,7 @@ $tempColumns = [
     ],
     'creator' => [
         'exclude' => 0,
-        'label'   => 'LLL:EXT:fal_manja/Resources/Private/Language/locallang_be.xlf:sys_file_metadata.creator',
+        'label'   => $lang_key.'creator',
         'config'  => [
             'type' => 'input',
             'size' => 30,
@@ -81,7 +84,7 @@ $tempColumns = [
     ],
     'created'     => [
         'exclude' => 0,
-        'label'   => 'LLL:EXT:fal_manja/Resources/Private/Language/locallang_be.xlf:sys_file_metadata.created',
+        'label'   => $lang_key.'created',
         'config'  => [
             'type'       => 'input',
             'renderType' => 'inputDateTime',
@@ -90,7 +93,7 @@ $tempColumns = [
     ],
     'changed'     => [
         'exclude' => 0,
-        'label'   => 'LLL:EXT:fal_manja/Resources/Private/Language/locallang_be.xlf:sys_file_metadata.changed',
+        'label'   => $lang_key.'changed',
         'config'  => [
             'type'       => 'input',
             'renderType' => 'inputDateTime',
@@ -127,7 +130,7 @@ $subtypesConfiguration = [
 ];
 
 foreach ($allStorages as $storage) {
-    if ($storage->getDriverType() !== FalManja::DRIVER_TYPE) {
+    if ($storage->getDriverType() !== ManjaDriver::DRIVER_TYPE) {
         $subtypesConfiguration['subtypes_excludelist'][$storage->getUid()]
             = 'subject, coverage, contributor, created, changed';
     }

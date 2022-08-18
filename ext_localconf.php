@@ -1,5 +1,7 @@
 <?php
 
+use Jokumer\FalManja\Driver\ManjaDriver;
+
 defined('TYPO3_MODE') or die();
 
 /***
@@ -32,13 +34,13 @@ if (!defined('TYPO3')) {
 
 call_user_func(
     function () {
-        $extKey = 'fal_manja';
+        $extKey = ManjaDriver::DRIVER_TYPE;
 
         // Register driver
         $GLOBALS['TYPO3_CONF_VARS']['SYS']['fal']['registeredDrivers'][$extKey] = [
             'class' => \Jokumer\FalManja\Driver\ManjaDriver::class,
-            'shortName' => \Jokumer\FalManja\Driver\FalManja::DRIVER_SHORT_NAME,
-            'flexFormDS' => 'FILE:EXT:fal_manja/Configuration/FlexForms/ManjaDriver.xml',
+            'shortName' => \Jokumer\FalManja\Driver\ManjaDriver::DRIVER_SHORT_NAME,
+            'flexFormDS' => "FILE:EXT:$extKey/Configuration/FlexForms/ManjaDriver.xml",
             'label' => 'Manja Digital Asset Management'
         ];
         // Cache configuration
@@ -52,7 +54,7 @@ call_user_func(
         }
 
         \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addPageTSConfig(
-            '<INCLUDE_TYPOSCRIPT: source="FILE:EXT:fal_manja/Configuration/TSconfig/Static/BackendForms.ts">'
+            '<INCLUDE_TYPOSCRIPT: source="FILE:EXT:'.$extKey.'/Configuration/TSconfig/Static/BackendForms.ts">'
         );
 
         $extractorRegistry = \TYPO3\CMS\Core\Resource\Index\ExtractorRegistry::getInstance();
