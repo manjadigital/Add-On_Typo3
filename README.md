@@ -17,9 +17,13 @@ This TYPO3 extension is licensed under GPL version 2 or any later version.
 
 ### Install via Composer
 
-If extension will be available at [packagist](https://packagist.org/packages/manja/typo3-storage-connector) you can require it via composer
+Extension will be available at [packagist](https://packagist.org/packages/manja/typo3-storage-connector) you can require it via composer
 
 `composer require manja/typo3-storage-connector`
+
+Add Database changes after installation
+
+`composer exec typo3cms database:update`
 
 ### Add file storage
 
